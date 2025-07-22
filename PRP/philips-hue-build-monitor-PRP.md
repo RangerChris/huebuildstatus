@@ -65,7 +65,7 @@ The project will be built in an agent mode, with code generated for approval aft
     *   **Task 1.1:** Setup project structure, test framework, and dependencies. Write tests for and implement Hue Bridge discovery logic. **(Completed)**
     *   **Task 1.2:** Write tests for and implement the authentication process to generate a new `appkey` by pressing the link button on the bridge. **(Completed)**
     *   **Task 1.3:** Write tests for and implement a `HueLightService` that can turn a light on/off. **(Completed)**
-    *   **Task 1.4:** Extend `HueLightService` tests and implementation to support changing color and brightness.
+    *   **Task 1.4:** Extend `HueLightService` tests and implementation to support changing color and brightness. **(Completed)**
 
 *   **Phase 2: Backend API with FastEndpoints**
     *   **Task 2.1:** Write a test for a simple `/health` endpoint and implement it.
