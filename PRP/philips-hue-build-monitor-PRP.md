@@ -34,6 +34,7 @@ This system aims to improve developer experience and team awareness by integrati
     *   Configuration managed through `appsettings.json`.
     *   Development methodology will be Test-Driven Development (TDD) using xUnit.
     *   Target code coverage of at least 80%.
+    *   Only use https://api.nuget.org/v3/index.json as source when adding nuget packages
 
 *   **Out-of-Scope:**
     *   A graphical user interface (GUI) for configuration or management.
@@ -69,7 +70,7 @@ The project will be built in an agent mode, with code generated for approval aft
 
 *   **Phase 2: Backend API with FastEndpoints**
     *   **Task 2.1:** Write a test for a simple `/health` endpoint and implement it. **(Completed)**
-    *   **Task 2.2:** Write tests for an endpoint to receive a GitHub `push` event. Implement the endpoint with mocked service logic.
+    *   **Task 2.2:** Write tests for an endpoint to receive a GitHub `push` event. Implement the endpoint with mocked service logic. **(Completed)**
     *   **Task 2.3:** Write tests for an endpoint to receive an Azure DevOps `build.complete` event. Implement the endpoint with mocked service logic.
     *   **Task 2.4:** Write tests for and implement API key security on the webhook endpoints.
 

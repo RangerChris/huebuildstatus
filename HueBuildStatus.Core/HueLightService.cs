@@ -1,6 +1,5 @@
-using System.Net.Http;
-using System.Text.Json;
 using System.Text;
+using System.Text.Json;
 
 namespace HueBuildStatus.Core;
 
@@ -18,7 +17,7 @@ public class HueLightService : IHueLightService
         var url = $"http://{bridgeIp}/api/v2/resource/light/{lightId}";
         var payload = new
         {
-            on = new { on = on }
+            on = new { on }
         };
         var request = new HttpRequestMessage(HttpMethod.Put, url)
         {
@@ -64,7 +63,7 @@ public class HueLightService : IHueLightService
     public async Task<bool> SetLightBrightnessAsync(string bridgeIp, string appKey, string lightId, int brightness)
     {
         // Brightness is 0-100, Hue API expects 0-254
-        int apiBrightness = Math.Clamp((int)(brightness * 2.54), 0, 254);
+        var apiBrightness = Math.Clamp((int)(brightness * 2.54), 0, 254);
         var url = $"http://{bridgeIp}/api/v2/resource/light/{lightId}";
         var payload = new
         {

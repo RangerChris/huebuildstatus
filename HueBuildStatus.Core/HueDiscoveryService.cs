@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -27,6 +28,7 @@ public class HueDiscoveryService : IHueDiscoveryService
             return null;
         }
     }
+
     public async Task<string?> AuthenticateAsync(string bridgeIp, string deviceType)
     {
         // The user must press the link button on the bridge before this request
@@ -34,10 +36,10 @@ public class HueDiscoveryService : IHueDiscoveryService
         var payload = new { devicetype = deviceType }; // Hue API expects { "devicetype": "appname#devicename" }
         try
         {
-            var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync(url, content);
             var json = await response.Content.ReadAsStringAsync();
-            var result = System.Text.Json.JsonSerializer.Deserialize<List<HueAuthResponse>>(json);
+            var result = JsonSerializer.Deserialize<List<HueAuthResponse>>(json);
             var success = result?.FirstOrDefault(r => r.Success != null)?.Success;
             return success?.Username;
         }
@@ -49,24 +51,23 @@ public class HueDiscoveryService : IHueDiscoveryService
 
     private class HueAuthResponse
     {
-        [System.Text.Json.Serialization.JsonPropertyName("success")]
-        public HueAuthSuccess? Success { get; set; }
-        [System.Text.Json.Serialization.JsonPropertyName("error")]
-        public HueAuthError? Error { get; set; }
+        [JsonPropertyName("success")] public HueAuthSuccess? Success { get; set; }
+
+        [JsonPropertyName("error")] public HueAuthError? Error { get; set; }
     }
+
     private class HueAuthSuccess
     {
-        [System.Text.Json.Serialization.JsonPropertyName("username")]
-        public string Username { get; set; } = string.Empty;
-        [System.Text.Json.Serialization.JsonPropertyName("clientkey")]
-        public string? ClientKey { get; set; }
+        [JsonPropertyName("username")] public string Username { get; } = string.Empty;
+
+        [JsonPropertyName("clientkey")] public string? ClientKey { get; set; }
     }
+
     private class HueAuthError
     {
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        public int Type { get; set; }
-        [System.Text.Json.Serialization.JsonPropertyName("description")]
-        public string Description { get; set; } = string.Empty;
+        [JsonPropertyName("type")] public int Type { get; set; }
+
+        [JsonPropertyName("description")] public string Description { get; set; } = string.Empty;
     }
 
     private class HueBridgeInfo
@@ -74,6 +75,6 @@ public class HueDiscoveryService : IHueDiscoveryService
         [JsonPropertyName("id")] public string Id { get; set; } = string.Empty;
 
         [JsonPropertyName("internalipaddress")]
-        public string InternalIpAddress { get; set; } = string.Empty;
+        public string InternalIpAddress { get; } = string.Empty;
     }
 }

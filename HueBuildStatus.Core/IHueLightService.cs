@@ -3,7 +3,7 @@ namespace HueBuildStatus.Core;
 public interface IHueLightService
 {
     /// <summary>
-    /// Turns a Hue light on or off.
+    ///     Turns a Hue light on or off.
     /// </summary>
     /// <param name="bridgeIp">IP address of the Hue Bridge.</param>
     /// <param name="appKey">API key for authentication.</param>
@@ -13,7 +13,7 @@ public interface IHueLightService
     Task<bool> SetLightOnOffAsync(string bridgeIp, string appKey, string lightId, bool on);
 
     /// <summary>
-    /// Changes the color of a Hue light using a hex color string (e.g., "#FF0000" for red).
+    ///     Changes the color of a Hue light using a hex color string (e.g., "#FF0000" for red).
     /// </summary>
     /// <param name="bridgeIp">IP address of the Hue Bridge.</param>
     /// <param name="appKey">API key for authentication.</param>
@@ -23,7 +23,7 @@ public interface IHueLightService
     Task<bool> SetLightColorAsync(string bridgeIp, string appKey, string lightId, string colorHex);
 
     /// <summary>
-    /// Changes the brightness of a Hue light (0-100).
+    ///     Changes the brightness of a Hue light (0-100).
     /// </summary>
     /// <param name="bridgeIp">IP address of the Hue Bridge.</param>
     /// <param name="appKey">API key for authentication.</param>
