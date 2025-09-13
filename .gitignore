@@ -417,3 +417,8 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# JetBrains IDE (Rider / IntelliJ) workspace files
+# Ignore entire .idea directory and all its contents
+.idea/
+.idea/**
