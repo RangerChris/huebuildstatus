@@ -3,14 +3,9 @@ using System.Text.Json;
 
 namespace HueBuildStatus.Core;
 
-public class HueLightService : IHueLightService
+public class HueLightService(HttpClient? httpClient = null) : IHueLightService
 {
-    private readonly HttpClient _httpClient;
-
-    public HueLightService(HttpClient? httpClient = null)
-    {
-        _httpClient = httpClient ?? new HttpClient();
-    }
+    private readonly HttpClient _httpClient = httpClient ?? new HttpClient();
 
     public async Task<bool> SetLightOnOffAsync(string bridgeIp, string appKey, string lightId, bool on)
     {
