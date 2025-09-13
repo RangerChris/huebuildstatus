@@ -1,5 +1,7 @@
 using FastEndpoints;
 
+namespace HueBuildStatus.Api.Features.Health;
+
 public class HealthEndpoint : EndpointWithoutRequest
 {
     public override void Configure()

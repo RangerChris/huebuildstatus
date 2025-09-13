@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace HueBuildStatus.Core;
+namespace HueBuildStatus.Core.Features.Hue;
 
 public class HueDiscoveryService : IHueDiscoveryService
 {
@@ -15,7 +15,6 @@ public class HueDiscoveryService : IHueDiscoveryService
 
     public async Task<string?> DiscoverBridgeAsync()
     {
-        // Philips Hue recommends using https://discovery.meethue.com/ for bridge discovery
         var url = "https://discovery.meethue.com/";
         try
         {
@@ -31,9 +30,8 @@ public class HueDiscoveryService : IHueDiscoveryService
 
     public async Task<string?> AuthenticateAsync(string bridgeIp, string deviceType)
     {
-        // The user must press the link button on the bridge before this request
         var url = $"http://{bridgeIp}/api";
-        var payload = new { devicetype = deviceType }; // Hue API expects { "devicetype": "appname#devicename" }
+        var payload = new { devicetype = deviceType };
         try
         {
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -52,21 +50,18 @@ public class HueDiscoveryService : IHueDiscoveryService
     private class HueAuthResponse
     {
         [JsonPropertyName("success")] public HueAuthSuccess? Success { get; set; }
-
         [JsonPropertyName("error")] public HueAuthError? Error { get; set; }
     }
 
     private class HueAuthSuccess
     {
         [JsonPropertyName("username")] public string Username { get; } = string.Empty;
-
         [JsonPropertyName("clientkey")] public string? ClientKey { get; set; }
     }
 
     private class HueAuthError
     {
         [JsonPropertyName("type")] public int Type { get; set; }
-
         [JsonPropertyName("description")] public string Description { get; set; } = string.Empty;
     }
 

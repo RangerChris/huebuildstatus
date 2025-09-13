@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace HueBuildStatus.Core;
+namespace HueBuildStatus.Core.Features.Hue;
 
 public class HueLightService(HttpClient? httpClient = null) : IHueLightService
 {

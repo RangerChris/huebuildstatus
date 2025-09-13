@@ -1,11 +1,12 @@
 Project: HueBuildStatus
 
 Purpose:
-- Help contributors and GitHub Copilot suggestions produce code and PRs consistent with this repository's conventions.
+- Help GitHub Copilot suggestions produce code and PRs consistent with this repository's conventions.
+- Provide context on architecture, design, and testing approaches.
+- Encourage best practices like TDD, DI, and clear naming.
 
 Project overview:
-- A small .NET (net9.0) solution that queries Philips Hue build status and exposes an API (FastEndpoints).
-- Languages: C# (primary). Tests use xUnit in HueBuildStatus.Tests.
+- details of the project description can be found in the README.md
 
 How Copilot should help:
 - Suggest code, tests, and small refactorings consistent with existing patterns.
@@ -14,13 +15,26 @@ How Copilot should help:
 
 Coding conventions / style:
 - Use modern C# (nullable reference types enabled, async/await for I/O-bound work).
-- Follow existing project patterns for dependency injection and layering (Core services, Api endpoints).
+- Use featured-based architecture with clear separation of concerns.
+- Follow SOLID principles and best practices for maintainability and testability.
+- Use dependency injection for services and abstractions.
+- Use FastEndpoints for API endpoints. API can be found at https://api-ref.fast-endpoints.com/api/FastEndpoints.html
 - Keep methods small and single-responsibility. Favor explicitness over magic.
-- Format with dotnet format (if available). Use clear, descriptive names for variables, methods, and parameters.
+- Use TDD approach: write tests first, then implement minimal code to pass tests, then refactor.
+
+#Techstack
+- .NET 9, C# 13
+- FastEndpoints for building APIs
+- xUnit (xunit.v3) for unit testing
+- Moq for mocking dependencies in tests
+- FluentAssertions (version 7.2.0) for readable assertions in tests, never update to latest version
+- Assume the developer is using Rider 2025.2.1 and works on a windows 11 PC. 
 
 Testing:
-- Add or update xUnit tests in HueBuildStatus.Tests for behavior changes.
+- Add or update xUnit (xunit.v3) tests in HueBuildStatus.Tests for behavior changes.
 - Tests should follow Arrange-Act-Assert and be deterministic. Use dependency injection to mock external dependencies.
+- Use Testcontainers or in-memory alternatives for integration tests if needed.
+- Aim for high code coverage, but prioritize meaningful tests over coverage percentage.
 
 Security and secrets:
 - Never suggest or insert secrets (API keys, tokens) into repository files. Use configuration and environment variables.
@@ -32,6 +46,7 @@ Files and folders to avoid editing:
 Pull requests and commits:
 - Keep PRs small and focused. Include a short description and reference related issues if any.
 - Ensure tests pass locally before suggesting a PR.
+- In agent mode, use github MCP tools to create PRs for review. If not available, ask if docker container with MCP server is running
 
 When to ask the user:
 - If a change affects behavior or public API and the intent is unclear, ask for clarification before applying.

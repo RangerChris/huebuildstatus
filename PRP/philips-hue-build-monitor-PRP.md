@@ -1,6 +1,3 @@
-Of course. Here is the updated Project Requirements Plan (PRP) based on the specified template. This document will serve as our guide for the project.
-
----
 
 ### **PRP: Hue DevOps Status Light**
 

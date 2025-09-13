@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text;
 using FluentAssertions;
-using HueBuildStatus.Core;
+using HueBuildStatus.Core.Features.Hue;
 using Moq;
 using Moq.Protected;
 

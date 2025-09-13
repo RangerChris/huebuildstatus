@@ -1,6 +1,0 @@
-@HueBuildStatus.Api_HostAddress = http://localhost:5133
-
-GET {{HueBuildStatus.Api_HostAddress}}/health/
-Accept: application/json
-
-###
