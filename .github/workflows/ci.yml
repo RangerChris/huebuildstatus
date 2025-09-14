@@ -40,8 +40,15 @@ jobs:
           # This uses coverlet.msbuild if present in the test project(s).
           dotnet test "HueBuildStatus.sln" --configuration Release --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=TestResults/coverage/
 
+      - name: List coverage files (debug)
+        run: |
+          echo "Listing TestResults/coverage directory:"
+          ls -l TestResults/coverage || true
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          files: TestResults/**/coverage*.xml
-          fail_ci_if_error: false
+          files: TestResults/coverage/coverage.cobertura.xml
+          fail_ci_if_error: true
+          # Uncomment the next line if your repo is private and you have set the secret
+          # token: ${{ secrets.CODECOV_TOKEN }}
