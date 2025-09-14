@@ -1,6 +1,8 @@
 # huebuildstatus
 
-[![CI](https://github.com/OWNER/huebuildstatus/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/OWNER/huebuildstatus/actions/workflows/ci.yml)
+[![CI](https://github.com/RangerChris/huebuildstatus/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/RangerChris/huebuildstatus/actions/workflows/ci.yml)
+[![Codecov](https://codecov.io/gh/RangerChris/huebuildstatus/branch/main/graph/badge.svg)](https://codecov.io/gh/RangerChris/huebuildstatus)
+
 
 This project will create a .NET 9 backend application that provides visual feedback for software development workflows. 
 
