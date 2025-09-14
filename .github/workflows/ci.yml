@@ -50,5 +50,4 @@ jobs:
         with:
           files: TestResults/coverage/coverage.cobertura.xml
           fail_ci_if_error: true
-          # Uncomment the next line if your repo is private and you have set the secret
-          # token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }}
