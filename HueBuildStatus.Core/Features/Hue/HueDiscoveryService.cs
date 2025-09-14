@@ -6,19 +6,22 @@ namespace HueBuildStatus.Core.Features.Hue;
 
 public class HueDiscoveryService : IHueDiscoveryService
 {
+    private readonly string _apiBaseUrl;
+    private readonly string _discoveryUrl;
     private readonly HttpClient _httpClient;
 
-    public HueDiscoveryService(HttpClient? httpClient = null)
+    public HueDiscoveryService(HttpClient? httpClient = null, string? discoveryUrl = null, string? apiBaseUrl = null)
     {
         _httpClient = httpClient ?? new HttpClient();
+        _discoveryUrl = discoveryUrl ?? "https://discovery.meethue.com/";
+        _apiBaseUrl = apiBaseUrl ?? "http://";
     }
 
     public async Task<string?> DiscoverBridgeAsync()
     {
-        var url = "https://discovery.meethue.com/";
         try
         {
-            var response = await _httpClient.GetStringAsync(url);
+            var response = await _httpClient.GetStringAsync(_discoveryUrl);
             var bridges = JsonSerializer.Deserialize<List<HueBridgeInfo>>(response);
             return bridges?.FirstOrDefault()?.InternalIpAddress;
         }
@@ -30,8 +33,9 @@ public class HueDiscoveryService : IHueDiscoveryService
 
     public async Task<string?> AuthenticateAsync(string bridgeIp, string deviceType)
     {
-        var url = $"http://{bridgeIp}/api";
+        var url = $"{_apiBaseUrl}{bridgeIp}/api";
         var payload = new { devicetype = deviceType };
+
         try
         {
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -55,7 +59,7 @@ public class HueDiscoveryService : IHueDiscoveryService
 
     private class HueAuthSuccess
     {
-        [JsonPropertyName("username")] public string Username { get; } = string.Empty;
+        [JsonPropertyName("username")] public string Username { get; set; } = string.Empty;
         [JsonPropertyName("clientkey")] public string? ClientKey { get; set; }
     }
 
@@ -70,6 +74,6 @@ public class HueDiscoveryService : IHueDiscoveryService
         [JsonPropertyName("id")] public string Id { get; set; } = string.Empty;
 
         [JsonPropertyName("internalipaddress")]
-        public string InternalIpAddress { get; } = string.Empty;
+        public string InternalIpAddress { get; set; } = string.Empty;
     }
 }

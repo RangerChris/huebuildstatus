@@ -21,6 +21,8 @@ Coding conventions / style:
 - Use FastEndpoints for API endpoints. API can be found at https://api-ref.fast-endpoints.com/api/FastEndpoints.html
 - Keep methods small and single-responsibility. Favor explicitness over magic.
 - Use TDD approach: write tests first, then implement minimal code to pass tests, then refactor.
+- Only use https://api.nuget.org/v3/index.json as source when adding nuget packages
+- When running something in the terminal, prefer using `dotnet` CLI commands over IDE-specific commands. Assume the developer is running powershell in Windows Terminal.
 
 #Techstack
 - .NET 9, C# 13

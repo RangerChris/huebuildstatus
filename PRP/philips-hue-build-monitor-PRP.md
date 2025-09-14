@@ -1,9 +1,15 @@
-
 ### **PRP: Hue DevOps Status Light**
 
 **1. Executive Summary**
 
-This project will create a .NET 9 backend application that provides visual feedback for software development workflows. The application will act as a bridge between CI/CD platforms (Azure DevOps, GitHub) and a local Philips Hue lighting system. By changing the color and state of a designated Hue light, developers receive immediate, ambient notifications about the status of their code commits, builds, and deployments. The application will be built using the FastEndpoints framework and will be developed following strict Test-Driven Development (TDD) principles to ensure high quality and reliability. The development process will be iterative, with the user approving and committing each completed task.
+This project will create a .NET 9 backend application that provides visual feedback for software development workflows. 
+The application will act as a bridge between CI/CD platforms (Azure DevOps, GitHub) and a local Philips Hue lighting system. 
+By changing the color and state of a designated Hue light, developers receive immediate, ambient notifications about the status of their code commits, builds, and deployments.
+
+When committing code to a repository, the light will pulse blue to indicate a new commit. 
+When building, the light will flash yellow to show that a build is in progress. 
+Upon build completion, the light will turn green for success or red for failure. 
+This system aims to reduce the cognitive load of monitoring build statuses through traditional means (emails, dashboards) by providing an intuitive, physical indicator.
 
 **2. User Stories**
 
@@ -16,7 +22,12 @@ This project will create a .NET 9 backend application that provides visual feedb
 
 **3. Business/System Context**
 
-This system aims to improve developer experience and team awareness by integrating physical, visual notifications into the DevOps lifecycle. It solves the problem of "notification fatigue" from emails and chat messages by providing a clear, ambient status indicator. The application will run as a local service, listening for webhook events from cloud services (GitHub, Azure DevOps) and translating them into commands sent to the local Philips Hue Bridge. All interaction with the Hue API will be based on the official v2 RESTful interface.
+This system aims to improve developer experience and team awareness by integrating physical, 
+visual notifications into the DevOps lifecycle. 
+
+It solves the problem of "notification fatigue" from emails and chat messages by providing a clear, ambient status indicator. 
+The application will run as a local service, listening for webhook events from cloud services (GitHub actions, Azure DevOps) and translating them into commands sent to the local Philips Hue Bridge. 
+All interaction with the Hue API will be based on the official Hue v2 RESTful interface.
 
 **4. Scope**
 
@@ -31,7 +42,6 @@ This system aims to improve developer experience and team awareness by integrati
     *   Configuration managed through `appsettings.json`.
     *   Development methodology will be Test-Driven Development (TDD) using xUnit.
     *   Target code coverage of at least 80%.
-    *   Only use https://api.nuget.org/v3/index.json as source when adding nuget packages
 
 *   **Out-of-Scope:**
     *   A graphical user interface (GUI) for configuration or management.
@@ -46,42 +56,39 @@ The solution will be developed iteratively through four distinct phases. We will
 
 **6. Architecture and Design**
 
-*   **Core Framework:** .NET 9 with FastEndpoints for creating a lightweight, high-performance API.
-*   **Language:** C# 13.
-*   **Testing Framework:** xUnit for test definitions, Moq for creating mock dependencies, and FluentAssertions for readable assertions.
-*   **Design Principles:**
-    *   **Test-Driven Development (TDD):** Every piece of functionality will begin with a failing test, followed by the minimal code required to make it pass, and then refactoring.
-    *   **Dependency Injection (DI):** Services (like the Hue interaction service) will be abstracted behind interfaces and injected into their dependencies, enabling loose coupling and high testability.
-    *   **Service Abstraction:** All external interactions (e.g., HTTP calls to the Hue Bridge) will be wrapped in a dedicated service (`IHueDiscoveryService`, `IHueControlService`) to isolate them from the core application logic.
-    *   **Configuration-driven:** All sensitive or environment-specific values (API keys, Bridge IP) will be managed via `appsettings.json`.
+*   See copilot-instructions.md for details on the architecture and design.
 
 **7. Implementation Plan**
 
 The project will be built in an agent mode, with code generated for approval after each task.
 
+✅ means the task have been completed
+
+☐ means task is planned, but not executed
+
 *   **Phase 1: Philips Hue Interaction Module**
-    *   **Task 1.1:** Setup project structure, test framework, and dependencies. Write tests for and implement Hue Bridge discovery logic. **(Completed)**
-    *   **Task 1.2:** Write tests for and implement the authentication process to generate a new `appkey` by pressing the link button on the bridge. **(Completed)**
-    *   **Task 1.3:** Write tests for and implement a `HueLightService` that can turn a light on/off. **(Completed)**
-    *   **Task 1.4:** Extend `HueLightService` tests and implementation to support changing color and brightness. **(Completed)**
+    *   **Task 1.1:** Setup project structure, test framework, and dependencies. Write tests for and implement Hue Bridge discovery logic. ✅
+    *   **Task 1.2:** Write tests for and implement the authentication process to generate a new `appkey` by pressing the link button on the bridge. ✅
+    *   **Task 1.3:** Write tests for and implement a `HueLightService` that can turn a light on/off. ✅
+    *   **Task 1.4:** Extend `HueLightService` tests and implementation to support changing color and brightness. ✅
 
 *   **Phase 2: Backend API with FastEndpoints**
-    *   **Task 2.1:** Write a test for a simple `/health` endpoint and implement it. **(Completed)**
-    *   **Task 2.2:** Write tests for an endpoint to receive a GitHub `push` event. Implement the endpoint with mocked service logic. **(Completed)**
-    *   **Task 2.3:** Write tests for an endpoint to receive an Azure DevOps `build.complete` event. Implement the endpoint with mocked service logic.
-    *   **Task 2.4:** Write tests for and implement API key security on the webhook endpoints.
+    *   **Task 2.1:** Write a test for a simple `/health` endpoint and implement it. ✅
+    *   **Task 2.2:** Write tests for an endpoint to receive a GitHub `push` event. Implement the endpoint with mocked service logic. ✅
+    *   **Task 2.3:** Write tests for an endpoint to receive an Azure DevOps `build.complete` event. Implement the endpoint with mocked service logic. ☐
+    *   **Task 2.4:** Write tests for and implement API key security on the webhook endpoints. ☐
 
 *   **Phase 3: Integration and Configuration**
-    *   **Task 3.1:** Write tests for and implement a configuration service to load settings from `appsettings.json`.
-    *   **Task 3.2:** Refactor the application to use the configuration service and integrate the `HueLightService` with the API endpoints.
-    *   **Task 3.3:** Perform manual end-to-end testing with ngrok and a real GitHub webhook.
-    *   **Task 3.4:** Perform manual end-to-end testing with ngrok and a real Azure DevOps service hook.
+    *   **Task 3.1:** Write tests for and implement a configuration service to load settings from `appsettings.json`. ☐
+    *   **Task 3.2:** Refactor the application to use the configuration service and integrate the `HueLightService` with the API endpoints. ☐
+    *   **Task 3.3:** Perform manual end-to-end testing with ngrok and a real GitHub webhook. ☐
+    *   **Task 3.4:** Perform manual end-to-end testing with ngrok and a real Azure DevOps service hook. ☐
 
 *   **Phase 4: Error Handling and Refinement**
-    *   **Task 4.1:** Write tests for and implement robust error handling (e.g., Hue Bridge is offline, invalid webhook payload).
-    *   **Task 4.2:** Implement structured logging throughout the application.
-    *   **Task 4.3:** Review code against the 80% coverage target and add tests where necessary.
-    *   **Task 4.4:** Create the `README.md` documentation explaining configuration and API usage.
+    *   **Task 4.1:** Write tests for and implement robust error handling (e.g., Hue Bridge is offline, invalid webhook payload). ☐
+    *   **Task 4.2:** Implement structured logging throughout the application. ☐
+    *   **Task 4.3:** Review code against the 80% coverage target and add tests where necessary. ☐
+    *   **Task 4.4:** Create the `README.md` documentation explaining configuration and API usage. ☐
 
 **8. Testing & Validation**
 
