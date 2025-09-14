@@ -12,11 +12,16 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="coverlet.msbuild" Version="3.2.0" />
         <PackageReference Include="FluentAssertions" Version="7.2.0"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
         <PackageReference Include="Moq" Version="4.20.72"/>
         <PackageReference Include="Testcontainers" Version="4.7.0"/>
         <PackageReference Include="xunit.v3" Version="3.0.1"/>
+        <!-- xUnit v3 test adapter so dotnet test discovers tests -->
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.0.0"/>
+        <!-- WebApplicationFactory for integration testing of ASP.NET Core apps -->
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.7"/>
     </ItemGroup>
 
     <ItemGroup>
