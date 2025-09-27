@@ -7,11 +7,9 @@ namespace HueBuildStatus.Api.Features.Webhooks;
 
 public class GitHubPushEndpoint : Endpoint<GitHubPushPayload>
 {
-    private readonly IGitHubWebhookHandler _handler;
 
-    public GitHubPushEndpoint(IGitHubWebhookHandler handler)
+    public GitHubPushEndpoint()
     {
-        _handler = handler;
     }
 
     public override void Configure()
@@ -23,7 +21,6 @@ public class GitHubPushEndpoint : Endpoint<GitHubPushPayload>
 
     public override async Task HandleAsync(GitHubPushPayload req, CancellationToken ct)
     {
-        await _handler.HandlePushAsync(req, ct);
         await Send.OkAsync(cancellation: ct);
     }
 }

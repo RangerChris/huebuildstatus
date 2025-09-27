@@ -1,6 +1,7 @@
 // Add DI registrations for Hue feature services
 
 using HueBuildStatus.Core.Features.Hue;
+using HueBuildStatus.Core.Features.Webhooks;
 
 namespace HueBuildStatus.Api.Features.Hue;
 

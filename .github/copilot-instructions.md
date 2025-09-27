@@ -12,6 +12,7 @@ How Copilot should help:
 - Suggest code, tests, and small refactorings consistent with existing patterns.
 - Prefer clarity, correctness, and minimal surface area changes over clever one-liners.
 - When making code changes, include or update unit tests where appropriate.
+- All new features should be created in TDD style: write tests first, then implement minimal code to pass tests, then refactor.
 
 Coding conventions / style:
 - Use modern C# (nullable reference types enabled, async/await for I/O-bound work).
@@ -23,14 +24,17 @@ Coding conventions / style:
 - Use TDD approach: write tests first, then implement minimal code to pass tests, then refactor.
 - Only use https://api.nuget.org/v3/index.json as source when adding nuget packages
 - When running something in the terminal, prefer using `dotnet` CLI commands over IDE-specific commands. Assume the developer is running powershell in Windows Terminal.
+- When creating code, do not add any comments unless absolutely necessary. If you do add comments, use XML documentation comments for public APIs.
 
 #Techstack
-- .NET 9, C# 13
+- .NET 9, latest C# version
 - FastEndpoints for building APIs
+- Hue.Api https://github.com/michielpost/Q42.HueApi for interacting with Philips Hue lights
+- Serilog for logging
 - xUnit (xunit.v3) for unit testing
 - Moq for mocking dependencies in tests
 - FluentAssertions (version 7.2.0) for readable assertions in tests, never update to latest version
-- Assume the developer is using Rider 2025.2.1 and works on a windows 11 PC. 
+- Assume the developer is using Rider 2025.2.2 and works on a Windows 11 PC. 
 
 Testing:
 - Add or update xUnit (xunit.v3) tests in HueBuildStatus.Tests for behavior changes.
@@ -49,6 +53,7 @@ Pull requests and commits:
 - Keep PRs small and focused. Include a short description and reference related issues if any.
 - Ensure tests pass locally before suggesting a PR.
 - In agent mode, use github MCP tools to create PRs for review. If not available, ask if docker container with MCP server is running
+- Use conventional commits style for commit messages (e.g., feat:, fix:, docs:, style:, refactor:, test:, chore:).
 
 When to ask the user:
 - If a change affects behavior or public API and the intent is unclear, ask for clarification before applying.
