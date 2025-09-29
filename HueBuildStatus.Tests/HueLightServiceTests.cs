@@ -1,6 +1,6 @@
 using System.Net;
 using System.Text;
-using FluentAssertions;
+using Shouldly;
 using HueBuildStatus.Core.Features.Hue;
 using Moq;
 using Moq.Protected;
@@ -31,7 +31,7 @@ public class HueLightServiceTests
         var result = await service.SetLightOnOffAsync("192.168.1.2", "test-appkey", "1", true);
 
         // Assert
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public class HueLightServiceTests
         var result = await service.SetLightOnOffAsync("192.168.1.2", "test-appkey", "1", false);
 
         // Assert
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class HueLightServiceTests
         var result = await service.SetLightColorAsync("192.168.1.2", "test-appkey", "1", "#FF0000");
 
         // Assert
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public class HueLightServiceTests
         var result = await service.SetLightColorAsync("192.168.1.2", "test-appkey", "1", "#FF0000");
 
         // Assert
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -131,7 +131,7 @@ public class HueLightServiceTests
         var result = await service.SetLightBrightnessAsync("192.168.1.2", "test-appkey", "1", 50);
 
         // Assert
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -156,7 +156,7 @@ public class HueLightServiceTests
         var result = await service.SetLightBrightnessAsync("192.168.1.2", "test-appkey", "1", 50);
 
         // Assert
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -177,6 +177,6 @@ public class HueLightServiceTests
         var result = await service.SetLightOnOffAsync("192.168.1.2", "test-appkey", "1", true);
 
         // Assert
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 }

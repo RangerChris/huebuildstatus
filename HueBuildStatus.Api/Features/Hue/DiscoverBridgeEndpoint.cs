@@ -3,15 +3,8 @@ using HueBuildStatus.Core.Features.Hue;
 
 namespace HueBuildStatus.Api.Features.Hue;
 
-public class DiscoverBridgeEndpoint : EndpointWithoutRequest<string>
+public class DiscoverBridgeEndpoint(IHueDiscoveryService discovery) : EndpointWithoutRequest<string>
 {
-    private readonly IHueDiscoveryService _discovery;
-
-    public DiscoverBridgeEndpoint(IHueDiscoveryService discovery)
-    {
-        _discovery = discovery;
-    }
-
     public override void Configure()
     {
         Get("/hue/discover");
@@ -21,7 +14,7 @@ public class DiscoverBridgeEndpoint : EndpointWithoutRequest<string>
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        var ip = await _discovery.DiscoverBridgeAsync();
+        var ip = await discovery.DiscoverBridgeAsync();
         if (string.IsNullOrEmpty(ip))
         {
             await Send.NotFoundAsync(ct);

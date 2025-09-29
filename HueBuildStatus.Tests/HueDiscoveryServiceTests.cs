@@ -1,6 +1,6 @@
 using System.Net;
 using System.Text;
-using FluentAssertions;
+using Shouldly;
 using HueBuildStatus.Core.Features.Hue;
 using Moq;
 using Moq.Protected;
@@ -30,7 +30,7 @@ public class HueDiscoveryServiceTests
         var result = await service.DiscoverBridgeAsync();
 
         // Assert
-        result.Should().Be("192.168.1.2");
+        result.ShouldBe("192.168.1.2");
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public class HueDiscoveryServiceTests
         var result = await service.AuthenticateAsync("192.168.1.2", "my-device");
 
         // Assert
-        result.Should().Be("test-appkey");
+        result.ShouldBe("test-appkey");
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public class HueDiscoveryServiceTests
         var result = await service.AuthenticateAsync("192.168.1.2", "my-device");
 
         // Assert
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -97,6 +97,6 @@ public class HueDiscoveryServiceTests
         var result = await service.DiscoverBridgeAsync();
 
         // Assert
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 }
