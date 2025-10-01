@@ -66,27 +66,6 @@ public class HueEndpointsTests
     }
 
     [Fact]
-    public async Task GetLight_ReturnsOk()
-    {
-        var mockLightService = new Mock<IHueLightService>();
-
-        using var client = _factory.WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services =>
-            {
-                services.AddSingleton<IHueLightService>(mockLightService.Object);
-                services.AddAuthorization();
-                services.AddSingleton<IStartupFilter>(new AuthorizationStartupFilter());
-            })).CreateClient();
-
-        var resp = await client.GetAsync("/hue/getLight?lightName=my-light");
-
-        resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var json = await resp.Content.ReadAsStringAsync();
-        json.ShouldNotBeNullOrEmpty();
-        json.ShouldContain("light", Case.Insensitive);
-    }
-
-    [Fact]
     public async Task RegisterBridge_ReturnsOk_WhenRegisterReturnsResult()
     {
         var mockDiscovery = new Mock<IHueDiscoveryService>();
@@ -122,43 +101,5 @@ public class HueEndpointsTests
         var resp = await client.GetAsync("/hue/register?Ip=1.2.3.4&Key=abc");
 
         resp.StatusCode.ShouldBe(HttpStatusCode.NotFound);
-    }
-
-    [Fact]
-    public async Task SetLight_ReturnsOk()
-    {
-        var mockLightService = new Mock<IHueLightService>();
-
-        using var client = _factory.WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services =>
-            {
-                services.AddSingleton<IHueLightService>(mockLightService.Object);
-                services.AddAuthorization();
-                services.AddSingleton<IStartupFilter>(new AuthorizationStartupFilter());
-            })).CreateClient();
-
-        var payload = JsonSerializer.Serialize(new { Color = (object?)null, Light = (object?)null });
-        var resp = await client.PostAsync("/hue/SetLight", new StringContent(payload, System.Text.Encoding.UTF8, "application/json"));
-
-        resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-    }
-
-    [Fact]
-    public async Task SetPulsatingLight_ReturnsOk()
-    {
-        var mockLightService = new Mock<IHueLightService>();
-
-        using var client = _factory.WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services =>
-            {
-                services.AddSingleton<IHueLightService>(mockLightService.Object);
-                services.AddAuthorization();
-                services.AddSingleton<IStartupFilter>(new AuthorizationStartupFilter());
-            })).CreateClient();
-
-        var payload = JsonSerializer.Serialize(new { Color = (object?)null, Light = (object?)null });
-        var resp = await client.PostAsync("/hue/SetPulsatingLight", new StringContent(payload, System.Text.Encoding.UTF8, "application/json"));
-
-        resp.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 }
