@@ -3,10 +3,11 @@ Project: HueBuildStatus
 Purpose:
 - Help GitHub Copilot suggestions produce code and PRs consistent with this repository's conventions.
 - Provide context on architecture, design, and testing approaches.
-- Encourage best practices like TDD, DI, and clear naming.
+- Encourage best practices like TDD, DI, SOLID principles and clear naming.
 
 Project overview:
-- details of the project description can be found in the README.md
+- Details what to build and the progress can be found in PRP/philips-hue-build-monitor-PRP.md
+- Mark tasks as complete in the PRP document when done. Done means code is written, tests are passing and PR is created for review.
 
 How Copilot should help:
 - Suggest code, tests, and small refactorings consistent with existing patterns.
@@ -15,6 +16,8 @@ How Copilot should help:
 - All new features should be created in TDD style: write tests first, then implement minimal code to pass tests, then refactor.
 
 Coding conventions / style:
+- Use github copilot in agent mode to create code and PRs.
+- Use MCP server tools like context7 for up-to-date documentation on libraries like FastEndpoints and HueApi
 - Use modern C# (nullable reference types enabled, async/await for I/O-bound work).
 - Use featured-based architecture with clear separation of concerns.
 - Follow SOLID principles and best practices for maintainability and testability.
@@ -24,7 +27,7 @@ Coding conventions / style:
 - Use TDD approach: write tests first, then implement minimal code to pass tests, then refactor.
 - Only use https://api.nuget.org/v3/index.json as source when adding nuget packages
 - When running something in the terminal, prefer using `dotnet` CLI commands over IDE-specific commands. Assume the developer is running powershell in Windows Terminal.
-- When creating code, do not add any comments unless absolutely necessary. If you do add comments, use XML documentation comments for public APIs.
+- When creating code, do not add any comments unless absolutely necessary.
 
 #Techstack
 - .NET 9, latest C# version

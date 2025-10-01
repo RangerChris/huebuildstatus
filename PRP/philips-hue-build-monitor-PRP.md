@@ -6,17 +6,15 @@ This project will create a .NET 9 backend application that provides visual feedb
 The application will act as a bridge between CI/CD platforms (Azure DevOps, GitHub) and a local Philips Hue lighting system. 
 By changing the color and state of a designated Hue light, developers receive immediate, ambient notifications about the status of their code commits, builds, and deployments.
 
-When committing code to a repository, the light will pulse blue to indicate a new commit. 
 When building, the light will flash yellow to show that a build is in progress. 
 Upon build completion, the light will turn green for success or red for failure. 
 This system aims to reduce the cognitive load of monitoring build statuses through traditional means (emails, dashboards) by providing an intuitive, physical indicator.
 
 **2. User Stories**
 
-*   **As a developer,** I want to see my Hue light turn green when my Azure DevOps build succeeds, so I get immediate positive feedback without checking the dashboard.
+*   **As a developer,** I want to see my Hue light turn green when my build succeeds, so I get immediate positive feedback without checking the dashboard.
 *   **As a developer,** I want to see my Hue light turn red when my build fails, so I am instantly notified that an issue needs my attention.
-*   **As a team member,** I want the light to flash yellow while a build is in progress, so I know not to merge other changes until it completes.
-*   **As a developer,** I want the light to pulse blue when a new commit is pushed to the main branch on GitHub, so I'm aware of recent changes from my team.
+*   **As a developer,** I want the light to flash yellow while a build is in progress. This way, I know that the system is actively working on my changes.
 *   **As a system administrator,** I want to securely configure the application with my Hue Bridge IP and API key via a configuration file, so my system credentials are not hardcoded.
 *   **As a system administrator,** I want the application to be able to find my Hue Bridge on the network automatically, to simplify the initial setup.
 
@@ -36,11 +34,11 @@ All interaction with the Hue API will be based on the official Hue v2 RESTful in
     *   Integration with the Philips Hue API v2 for light control (on/off, color, brightness).
     *   Automatic discovery of the Hue Bridge on the local network.
     *   Endpoints to receive and process webhooks from:
-        *   GitHub (for `push` events).
-        *   Azure DevOps (for build completion events).
+        *   GitHub.
+        *   Azure DevOps.
     *   Secure API endpoints using a configurable API key.
     *   Configuration managed through `appsettings.json`.
-    *   Development methodology will be Test-Driven Development (TDD) using xUnit.
+    *   Development methodology will be Test-Driven Development (TDD) using xUnit.V3.
     *   Target code coverage of at least 80%.
 
 *   **Out-of-Scope:**
@@ -75,15 +73,22 @@ The project will be built in an agent mode, with code generated for approval aft
 
 *   **Phase 1: Philips Hue Interaction Module**
     *   **Task 1.1:** Setup project structure, test framework, and dependencies. Write tests for and implement Hue Bridge discovery logic. ✅
-    *   **Task 1.2:** Write tests for and implement the authentication process to generate a new `appkey` by pressing the link button on the bridge. This is done by calling {{baseURL}}/api where baseURL is the IP address of the bridge. ☐
-    *   **Task 1.3:** Write tests for and implement a `HueLightService` that can turn a light on/off. ☐
-    *   **Task 1.4:** Extend `HueLightService` tests and implementation to support changing color and brightness. ☐
+    *   **Task 1.2:** Write unit tests for and implement a `HueLightService` that discovers the bride IP address, if the IP is not already provided in the appsettings.json. The IP is returned, but not stored anywhere. It's up to the user of the system to set it in appsettings.json using the setting 'bridgeIp' ☐
+    *   **Task 1.3:** Extend `HueLightService` with a method to register the bridge. if the key is not already provided in the appsettings.json. The key is returned, but not stored anywhere. It's up to the user of the system to set it in appsettings.json using the setting 'bridgeIp' ☐
+    *   **Task 1.4:** Extend `HueLightService` with a way to get a list of all available lights. The list has the id and name of the light. ☐
+    *   **Task 1.5:** Extend `HueLightService` with a way to get a specific light, by providing the name of the light. ☐
+    *   **Task 1.6:** Extend `HueLightService` with a method to take a snapshot of the lights state.  ☐
+    *   **Task 1.7:** Extend `HueLightService` with a method to set color (red, green, yellow). Brightness is always 100. Use previous snapshot method before setting the light and then show the color for 2 seconds, then restore the previous state again. ☐
+    *   **Task 1.8:** Extend `HueLightService` with a method to flash the light (on/off/on/off) for 5 seconds. Use the same pattern to take snapshot and restore as in task 1.7 ☐
 
 *   **Phase 2: Backend API with FastEndpoints**
-    *   **Task 2.1:** Write a test for a simple `/health` endpoint and implement it. ✅
-    *   **Task 2.2:** Write tests for an endpoint to receive a GitHub `push` event. Implement the endpoint with mocked service logic. ☐
-    *   **Task 2.3:** Write tests for an endpoint to receive an Azure DevOps `build.complete` event. Implement the endpoint with mocked service logic. ☐
-    *   **Task 2.4:** Write tests for and implement API key security on the webhook endpoints. ☐
+    *   **Task 2.1:** Write a integration test for a simple `/health` endpoint that checks if we have a hue bridge ip and key and implement it. ☐
+    *   **Task 2.2:** Write a integration test for the endpoint '/hue/discover' that uses the `HueLightService` from task 1.2 and implement it. ☐
+    *   **Task 2.2:** Write a integration test for the endpoint '/hue/register' that uses the `HueLightService` from task 1.3 and implement it. ☐
+    *   **Task 2.3:** Write a integration test for the endpoint '/hue/getalllights' that uses the `HueLightService` from task 1.4 and implement it. ☐
+    *   **Task 2.4:** Write a integration test for the endpoint '/hue/getlight' that uses the `HueLightService` from task 1.5 and implement it. ☐
+    *   **Task 2.5:** Write a integration test for the endpoint '/hue/setlight' that uses the `HueLightService` from task 1.6 + 1.7 and implement it. ☐
+    *   **Task 2.6:** Write a integration test for the endpoint '/hue/pulseatelight' that uses the `HueLightService` from task 1.6 + 1.8 and implement it. ☐
 
 *   **Phase 3: Integration and Configuration**
     *   **Task 3.1:** Write tests for and implement a configuration service to load settings from `appsettings.json`. ☐
@@ -95,7 +100,7 @@ The project will be built in an agent mode, with code generated for approval aft
     *   **Task 4.1:** Write tests for and implement robust error handling (e.g., Hue Bridge is offline, invalid webhook payload). ☐
     *   **Task 4.2:** Implement structured logging throughout the application. ☐
     *   **Task 4.3:** Review code against the 80% coverage target and add tests where necessary. ☐
-    *   **Task 4.4:** Create the `README.md` documentation explaining configuration and API usage. ☐
+    *   **Task 4.4:** Create documentation using the FastEndpoints explaining configuration and API usage. ☐
 
 **8. Testing & Validation**
 
