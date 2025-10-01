@@ -73,8 +73,8 @@ The project will be built in an agent mode, with code generated for approval aft
 
 *   **Phase 1: Philips Hue Interaction Module**
     *   **Task 1.1:** Setup project structure, test framework, and dependencies. Write tests for and implement Hue Bridge discovery logic. ✅
-    *   **Task 1.2:** Write unit tests for and implement a `HueLightService` that discovers the bride IP address, if the IP is not already provided in the appsettings.json. The IP is returned, but not stored anywhere. It's up to the user of the system to set it in appsettings.json using the setting 'bridgeIp' ☐
-    *   **Task 1.3:** Extend `HueLightService` with a method to register the bridge. if the key is not already provided in the appsettings.json. The key is returned, but not stored anywhere. It's up to the user of the system to set it in appsettings.json using the setting 'bridgeIp' ☐
+        *   **Task 1.2:** Write unit tests for and implement a `HueLightService` that discovers the bridge IP address, if the IP is not already provided in the appsettings.json. The IP is returned, but not stored anywhere. It's up to the user of the system to set it in appsettings.json using the setting 'bridgeIp' ✅
+        *   **Task 1.3:** Extend `HueLightService` with a method to register the bridge. if the key is not already provided in the appsettings.json. The key is returned, but not stored anywhere. It's up to the user of the system to set it in appsettings.json using the setting 'bridgeKey' ☐
     *   **Task 1.4:** Extend `HueLightService` with a way to get a list of all available lights. The list has the id and name of the light. ☐
     *   **Task 1.5:** Extend `HueLightService` with a way to get a specific light, by providing the name of the light. ☐
     *   **Task 1.6:** Extend `HueLightService` with a method to take a snapshot of the lights state.  ☐
@@ -84,11 +84,11 @@ The project will be built in an agent mode, with code generated for approval aft
 *   **Phase 2: Backend API with FastEndpoints**
     *   **Task 2.1:** Write a integration test for a simple `/health` endpoint that checks if we have a hue bridge ip and key and implement it. ☐
     *   **Task 2.2:** Write a integration test for the endpoint '/hue/discover' that uses the `HueLightService` from task 1.2 and implement it. ☐
-    *   **Task 2.2:** Write a integration test for the endpoint '/hue/register' that uses the `HueLightService` from task 1.3 and implement it. ☐
-    *   **Task 2.3:** Write a integration test for the endpoint '/hue/getalllights' that uses the `HueLightService` from task 1.4 and implement it. ☐
-    *   **Task 2.4:** Write a integration test for the endpoint '/hue/getlight' that uses the `HueLightService` from task 1.5 and implement it. ☐
-    *   **Task 2.5:** Write a integration test for the endpoint '/hue/setlight' that uses the `HueLightService` from task 1.6 + 1.7 and implement it. ☐
-    *   **Task 2.6:** Write a integration test for the endpoint '/hue/pulseatelight' that uses the `HueLightService` from task 1.6 + 1.8 and implement it. ☐
+        *   **Task 2.3:** Write a integration test for the endpoint '/hue/register' that uses the `HueLightService` from task 1.3 and implement it. ☐
+    *   **Task 2.4:** Write a integration test for the endpoint '/hue/getalllights' that uses the `HueLightService` from task 1.4 and implement it. ☐
+    *   **Task 2.5:** Write a integration test for the endpoint '/hue/getlight' that uses the `HueLightService` from task 1.5 and implement it. ☐
+    *   **Task 2.6:** Write a integration test for the endpoint '/hue/setlight' that uses the `HueLightService` from task 1.6 + 1.7 and implement it. ☐
+        *   **Task 2.6:** Write a integration test for the endpoint '/hue/pulsatelight' that uses the `HueLightService` from task 1.6 + 1.8 and implement it. ☐
 
 *   **Phase 3: Integration and Configuration**
     *   **Task 3.1:** Write tests for and implement a configuration service to load settings from `appsettings.json`. ☐
