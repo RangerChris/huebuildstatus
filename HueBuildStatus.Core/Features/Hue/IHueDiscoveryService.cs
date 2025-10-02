@@ -15,4 +15,5 @@ public interface IHueDiscoveryService
     Task<Dictionary<Guid, string>> GetAllLights();
     Task<LightSnapshot> CaptureLightSnapshotAsync(Guid lightId);
     Task RestoreLightSnapshotAsync(LightSnapshot snapshot, int transitionMs = 0);
+    Task<string?> AuthenticateAsync(string bridgeIp, string deviceType);
 }

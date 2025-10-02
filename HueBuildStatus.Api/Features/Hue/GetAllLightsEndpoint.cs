@@ -21,5 +21,5 @@ public class GetAllLightsEndpoint : EndpointWithoutRequest<AllLightsResponse>
 
 public class AllLightsResponse
 {
-    public Dictionary<Guid, string> NameList { get; set; }
+    public Dictionary<Guid, string> NameList { get; set; } = new Dictionary<Guid, string>();
 }

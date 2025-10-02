@@ -41,10 +41,10 @@ public class HueEndpointsTests
                 services.AddSingleton<IHueDiscoveryService>(mockDiscovery.Object);
             })).CreateClient();
 
-        var resp = await client.GetAsync("/hue/discover");
+        var resp = await client.GetAsync("/hue/discover", TestContext.Current.CancellationToken);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var body = await resp.Content.ReadFromJsonAsync<string>();
+        var body = await resp.Content.ReadFromJsonAsync<string>(cancellationToken: TestContext.Current.CancellationToken);
         body.ShouldBe("192.168.1.100");
     }
 
@@ -60,7 +60,7 @@ public class HueEndpointsTests
                 services.AddSingleton<IHueDiscoveryService>(mockDiscovery.Object);
             })).CreateClient();
 
-        var resp = await client.GetAsync("/hue/discover");
+        var resp = await client.GetAsync("/hue/discover", TestContext.Current.CancellationToken);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
@@ -81,7 +81,7 @@ public class HueEndpointsTests
                 services.AddSingleton<IHueDiscoveryService>(mockDiscovery.Object);
             })).CreateClient();
 
-        var resp = await client.GetAsync("/hue/register?Ip=1.2.3.4&Key=abc");
+        var resp = await client.GetAsync("/hue/register?Ip=1.2.3.4&Key=abc", TestContext.Current.CancellationToken);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
@@ -98,7 +98,7 @@ public class HueEndpointsTests
                 services.AddSingleton<IHueDiscoveryService>(mockDiscovery.Object);
             })).CreateClient();
 
-        var resp = await client.GetAsync("/hue/register?Ip=1.2.3.4&Key=abc");
+        var resp = await client.GetAsync("/hue/register?Ip=1.2.3.4&Key=abc", TestContext.Current.CancellationToken);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }

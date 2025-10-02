@@ -7,8 +7,8 @@ namespace HueBuildStatus.Api.Features.Hue;
 
 public class SetPulsatingLightRequest
 {
-    public RGBColor Color { get; set; }
-    public Light Light { get; set; }
+    public RGBColor? Color { get; set; }
+    public Light? Light { get; set; }
 }
 
 public class SetPulsatingLightEndpoint(IHueLightService hue) : Endpoint<SetPulsatingLightRequest>

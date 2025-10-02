@@ -74,7 +74,7 @@ The project will be built in an agent mode, with code generated for approval aft
 *   **Phase 1: Philips Hue Interaction Module**
     *   **Task 1.1:** Setup project structure, test framework, and dependencies. Write tests for and implement Hue Bridge discovery logic. ✅
         *   **Task 1.2:** Write unit tests for and implement a `HueLightService` that discovers the bridge IP address, if the IP is not already provided in the appsettings.json. The IP is returned, but not stored anywhere. It's up to the user of the system to set it in appsettings.json using the setting 'bridgeIp' ✅
-        *   **Task 1.3:** Extend `HueLightService` with a method to register the bridge. if the key is not already provided in the appsettings.json. The key is returned, but not stored anywhere. It's up to the user of the system to set it in appsettings.json using the setting 'bridgeKey' ☐
+        *   **Task 1.3:** Write unit tests for and implement a `HueLightService` that discovers the bridge IP address, if the IP is not already provided in the appsettings.json. The IP is returned, but not stored anywhere. It's up to the user of the system to set it in appsettings.json using the setting 'bridgeKey' ✅
     *   **Task 1.4:** Extend `HueLightService` with a way to get a list of all available lights. The list has the id and name of the light. ☐
     *   **Task 1.5:** Extend `HueLightService` with a way to get a specific light, by providing the name of the light. ☐
     *   **Task 1.6:** Extend `HueLightService` with a method to take a snapshot of the lights state.  ☐

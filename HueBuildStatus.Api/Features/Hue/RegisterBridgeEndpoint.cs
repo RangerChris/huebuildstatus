@@ -5,8 +5,8 @@ namespace HueBuildStatus.Api.Features.Hue;
 
 public class RegisterBridgeRequest
 {
-    public string Ip { get; set; }
-    public string Key { get; set; }
+    public string? Ip { get; set; }
+    public string? Key { get; set; }
 }
 
 public class RegisterBridgeEndpoint(IHueDiscoveryService discovery) : Endpoint<RegisterBridgeRequest>
@@ -20,6 +20,12 @@ public class RegisterBridgeEndpoint(IHueDiscoveryService discovery) : Endpoint<R
 
     public override async Task HandleAsync(RegisterBridgeRequest req, CancellationToken ct)
     {
+        if (string.IsNullOrWhiteSpace(req.Ip) || string.IsNullOrWhiteSpace(req.Key))
+        {
+            await Send.NotFoundAsync(ct);
+            return;
+        }
+
         var result = await discovery.Register(req.Ip, req.Key);
         if (result is null)
         {

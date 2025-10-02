@@ -7,8 +7,8 @@ namespace HueBuildStatus.Api.Features.Hue;
 
 public class SetLightRequest
 {
-    public RGBColor Color { get; set; }
-    public Light Light { get; set; }
+    public RGBColor? Color { get; set; }
+    public Light? Light { get; set; }
 }
 
 public class SetLightEndpoint(IHueLightService hue) : Endpoint<SetLightRequest>

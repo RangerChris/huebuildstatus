@@ -21,7 +21,7 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
         using var client = _factory.CreateClient();
 
         // Act
-        var resp = await client.GetAsync("/health");
+        var resp = await client.GetAsync("/health", TestContext.Current.CancellationToken);
 
         // Assert
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -34,13 +34,13 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
         using var client = _factory.CreateClient();
 
         // Act
-        var resp = await client.GetAsync("/hue/GetAllLights");
+        var resp = await client.GetAsync("/hue/GetAllLights", TestContext.Current.CancellationToken);
 
         // Assert
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
         resp.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
 
-        var json = await resp.Content.ReadAsStringAsync();
+        var json = await resp.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         json.ShouldNotBeNullOrEmpty();
     }
 }

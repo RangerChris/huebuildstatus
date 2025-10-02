@@ -7,12 +7,12 @@ namespace HueBuildStatus.Api.Features.Hue;
 
 public class GetLightRequest
 {
-    public string lightName { get; init; }
+    public string? lightName { get; init; }
 }
 
 public class GetLightResponse
 {
-    public Light light { get; init; }
+    public Light? light { get; init; }
 }
 
 public class GetLightEndpoint(IHueLightService hue) : Endpoint<GetLightRequest, GetLightResponse>
