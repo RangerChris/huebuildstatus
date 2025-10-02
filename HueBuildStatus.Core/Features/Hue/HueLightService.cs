@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 namespace HueBuildStatus.Core.Features.Hue;
 
 public class HueLightService : IHueLightService
@@ -44,5 +48,29 @@ public class HueLightService : IHueLightService
         }
 
         return lights;
+    }
+
+    public async Task<LightInfo?> GetLightByNameAsync(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return null;
+        }
+
+        var lights = await _discoveryService.GetAllLights();
+        if (lights is null || lights.Count == 0)
+        {
+            return null;
+        }
+
+        foreach (var kv in lights)
+        {
+            if (string.Equals(kv.Value, name, StringComparison.OrdinalIgnoreCase))
+            {
+                return new LightInfo { Id = kv.Key, Name = kv.Value };
+            }
+        }
+
+        return null;
     }
 }

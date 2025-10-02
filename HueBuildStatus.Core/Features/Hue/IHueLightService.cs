@@ -7,4 +7,6 @@ public interface IHueLightService
     Task<string?> RegisterBridgeAsync(string bridgeIp, string? configuredBridgeKey = null);
 
     Task<Dictionary<Guid, string>> GetAllLightsAsync();
+
+    Task<LightInfo?> GetLightByNameAsync(string name);
 }

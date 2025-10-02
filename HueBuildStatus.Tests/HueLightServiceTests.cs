@@ -117,4 +117,63 @@ public class HueLightServiceTests
         result.Count.ShouldBe(0);
         mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
     }
+
+    [Fact]
+    public async Task GetLightByNameAsync_ReturnsLight_WhenFound_CaseInsensitive()
+    {
+        var mockDiscovery = new Mock<IHueDiscoveryService>();
+        var id = Guid.NewGuid();
+        var lights = new Dictionary<Guid, string> { { id, "Desk Lamp" } };
+        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+
+        var service = new HueLightService(mockDiscovery.Object);
+
+        var result = await service.GetLightByNameAsync("desk lamp");
+
+        result.ShouldNotBeNull();
+        result.Id.ShouldBe(id);
+        result.Name.ShouldBe("Desk Lamp");
+        mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetLightByNameAsync_ReturnsNull_WhenNotFound()
+    {
+        var mockDiscovery = new Mock<IHueDiscoveryService>();
+        var lights = new Dictionary<Guid, string> { { Guid.NewGuid(), "Other" } };
+        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+
+        var service = new HueLightService(mockDiscovery.Object);
+
+        var result = await service.GetLightByNameAsync("Nonexistent");
+
+        result.ShouldBeNull();
+        mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetLightByNameAsync_ReturnsNull_WhenNameIsNullOrWhitespace()
+    {
+        var mockDiscovery = new Mock<IHueDiscoveryService>();
+        var service = new HueLightService(mockDiscovery.Object);
+
+        var result = await service.GetLightByNameAsync("   ");
+
+        result.ShouldBeNull();
+        mockDiscovery.Verify(d => d.GetAllLights(), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetLightByNameAsync_ReturnsNull_WhenDiscoveryReturnsNull()
+    {
+        var mockDiscovery = new Mock<IHueDiscoveryService>();
+        mockDiscovery.Setup(d => d.GetAllLights()).Returns(Task.FromResult<Dictionary<Guid, string>?>(null));
+
+        var service = new HueLightService(mockDiscovery.Object);
+
+        var result = await service.GetLightByNameAsync("Desk");
+
+        result.ShouldBeNull();
+        mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
+    }
 }
