@@ -1,8 +1,9 @@
 using FastEndpoints;
+using HueBuildStatus.Core.Features.Hue;
 
 namespace HueBuildStatus.Api.Features.Hue;
 
-public class GetAllLightsEndpoint : EndpointWithoutRequest<AllLightsResponse>
+public class GetAllLightsEndpoint(IHueLightService lightService) : EndpointWithoutRequest<AllLightsResponse>
 {
     public override void Configure()
     {
@@ -13,7 +14,9 @@ public class GetAllLightsEndpoint : EndpointWithoutRequest<AllLightsResponse>
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        await Send.OkAsync(new AllLightsResponse(), ct);
+        var dict = await lightService.GetAllLightsAsync();
+        var resp = new AllLightsResponse { NameList = dict ?? new Dictionary<Guid, string>() };
+        await Send.OkAsync(resp, ct);
     }
 }
 

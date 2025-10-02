@@ -9,26 +9,32 @@ public class GetLightRequest
     public string? lightName { get; init; }
 }
 
-public class GetLightResponse
-{
-    public Light? light { get; init; }
-}
-
-public class GetLightEndpoint(IHueLightService hue) : Endpoint<GetLightRequest, GetLightResponse>
+public class GetLightEndpoint(IHueLightService hue) : Endpoint<GetLightRequest, LightInfo>
 {
     private readonly IHueLightService _hue = hue;
 
     public override void Configure()
     {
-        Get("/hue/getLight");
+        Get("/hue/getlight");
+        AllowAnonymous();
         Description(s => s.WithSummary("Get Hue light by name").WithDescription(""));
     }
 
     public override async Task HandleAsync(GetLightRequest req, CancellationToken ct)
     {
-        await Send.OkAsync(new GetLightResponse
+        if (string.IsNullOrWhiteSpace(req.lightName))
         {
-            light = new Light()
-        }, ct);
+            await Send.ResultAsync(TypedResults.BadRequest());
+            return;
+        }
+
+        var info = await _hue.GetLightByNameAsync(req.lightName);
+        if (info is null)
+        {
+            await Send.NotFoundAsync(ct);
+            return;
+        }
+
+        await Send.OkAsync(info, ct);
     }
 }

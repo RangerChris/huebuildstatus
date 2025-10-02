@@ -4,6 +4,7 @@ using System.Text.Json;
 using HueApi.ColorConverters;
 using HueApi.Models;
 using HueApi.Models.Clip;
+using HueBuildStatus.Core.Features.Config;
 
 namespace HueBuildStatus.Core.Features.Hue;
 
@@ -12,16 +13,24 @@ public class HueDiscoveryService : IHueDiscoveryService
     private readonly string _apiBaseUrl;
     private readonly string _discoveryUrl;
     private readonly HttpClient _httpClient;
+    private readonly IAppConfiguration? _config;
 
-    public HueDiscoveryService(HttpClient? httpClient = null, string? discoveryUrl = null, string? apiBaseUrl = null)
+    public HueDiscoveryService(HttpClient? httpClient = null, string? discoveryUrl = null, string? apiBaseUrl = null, IAppConfiguration? config = null)
     {
         _httpClient = httpClient ?? new HttpClient();
         _discoveryUrl = discoveryUrl ?? "https://discovery.meethue.com/";
         _apiBaseUrl = apiBaseUrl ?? "http://";
+        _config = config;
     }
 
     public async Task<string?> DiscoverBridgeAsync()
     {
+        // If configured explicitly, prefer that
+        if (!string.IsNullOrWhiteSpace(_config?.BridgeIp))
+        {
+            return _config!.BridgeIp;
+        }
+
         try
         {
             using var resp = await _httpClient.GetAsync(_discoveryUrl);
@@ -87,13 +96,18 @@ public class HueDiscoveryService : IHueDiscoveryService
 
     public async Task<Dictionary<Guid, string>?> GetAllLights()
     {
-        var bridgeIp = await DiscoverBridgeAsync();
+        // Prefer configured bridge IP and key
+        var bridgeIp = _config?.BridgeIp;
+        if (string.IsNullOrWhiteSpace(bridgeIp))
+        {
+            bridgeIp = await DiscoverBridgeAsync();
+        }
         if (string.IsNullOrWhiteSpace(bridgeIp))
         {
             return null;
         }
 
-        var appKey = Environment.GetEnvironmentVariable("HUE_APP_KEY");
+        var appKey = _config?.BridgeKey ?? Environment.GetEnvironmentVariable("HUE_APP_KEY");
         if (string.IsNullOrWhiteSpace(appKey))
         {
             return null;

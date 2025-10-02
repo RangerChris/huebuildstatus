@@ -82,17 +82,17 @@ The project will be built in an agent mode, with code generated for approval aft
     *   **Task 1.8:** Extend `HueLightService` with a method to flash the light (on/off/on/off) for 5 seconds. Use the same pattern to take snapshot and restore as in task 1.7 ✅
 
 *   **Phase 2: Backend API with FastEndpoints**
-    *   **Task 2.1:** Write a integration test for a simple `/health` endpoint that checks if we have a hue bridge ip and key and implement it. ☐
-    *   **Task 2.2:** Write a integration test for the endpoint '/hue/discover' that uses the `HueLightService` from task 1.2 and implement it. ☐
-        *   **Task 2.3:** Write a integration test for the endpoint '/hue/register' that uses the `HueLightService` from task 1.3 and implement it. ☐
-    *   **Task 2.4:** Write a integration test for the endpoint '/hue/getalllights' that uses the `HueLightService` from task 1.4 and implement it. ☐
-    *   **Task 2.5:** Write a integration test for the endpoint '/hue/getlight' that uses the `HueLightService` from task 1.5 and implement it. ☐
-    *   **Task 2.6:** Write a integration test for the endpoint '/hue/setlight' that uses the `HueLightService` from task 1.6 + 1.7 and implement it. ☐
-        *   **Task 2.6:** Write a integration test for the endpoint '/hue/pulsatelight' that uses the `HueLightService` from task 1.6 + 1.8 and implement it. ☐
+    *   **Task 2.1:** Write a integration test for a simple `/health` endpoint that checks if we have a hue bridge ip and key and implement it. ✅
+    *   **Task 2.2:** Write a integration test for the endpoint '/hue/discover' that uses the `HueLightService` from task 1.2 and implement it. ✅
+        *   **Task 2.3:** Write a integration test for the endpoint '/hue/register' that uses the `HueLightService` from task 1.3 and implement it. ✅
+    *   **Task 2.4:** Write a integration test for the endpoint '/hue/getalllights' that uses the `HueLightService` from task 1.4 and implement it. ✅
+    *   **Task 2.5:** Write a integration test for the endpoint '/hue/getlight' that uses the `HueLightService` from task 1.5 and implement it. ✅
+    *   **Task 2.6:** Write a integration test for the endpoint '/hue/setlight' that uses the `HueLightService` from task 1.6 + 1.7 and implement it. ✅
+        *   **Task 2.6:** Write a integration test for the endpoint '/hue/pulsatelight' that uses the `HueLightService` from task 1.6 + 1.8 and implement it. ✅
 
 *   **Phase 3: Integration and Configuration**
-    *   **Task 3.1:** Write tests for and implement a configuration service to load settings from `appsettings.json`. ☐
-    *   **Task 3.2:** Refactor the application to use the configuration service and integrate the `HueLightService` with the API endpoints. ☐
+    *   **Task 3.1:** Write tests for and implement a configuration service to load settings from `appsettings.json`. ✅
+    *   **Task 3.2:** Refactor the application to use the configuration service and integrate the `HueLightService` with the API endpoints. ✅
     *   **Task 3.3:** Perform manual end-to-end testing with ngrok and a real GitHub webhook. ☐
     *   **Task 3.4:** Perform manual end-to-end testing with ngrok and a real Azure DevOps service hook. ☐
 

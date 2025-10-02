@@ -48,17 +48,14 @@ public class HueEndpointsTests
     [Fact]
     public async Task RegisterBridge_ReturnsOk_WhenRegisterReturnsResult()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-
-        var resultInstance = new RegisterEntertainmentResult();
-
-        mockDiscovery.Setup(x => x.Register(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(resultInstance);
+        var mockLightSvc = new Mock<IHueLightService>();
+        mockLightSvc.Setup(x => x.RegisterBridgeAsync(It.IsAny<string>(), It.IsAny<string?>())).ReturnsAsync("new-key");
 
         using var client = _factory.WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services => { services.AddSingleton(mockDiscovery.Object); })).CreateClient();
+            builder.ConfigureTestServices(services => { services.AddSingleton<IHueLightService>(mockLightSvc.Object); })).CreateClient();
 
-        var resp = await client.GetAsync("/hue/register?Ip=1.2.3.4&Key=abc", TestContext.Current.CancellationToken);
+        var content = JsonContent.Create(new { Ip = "1.2.3.4", Key = "abc" });
+        var resp = await client.PostAsync("/hue/register", content, TestContext.Current.CancellationToken);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
@@ -66,15 +63,102 @@ public class HueEndpointsTests
     [Fact]
     public async Task RegisterBridge_ReturnsNotFound_WhenRegisterReturnsNull()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        mockDiscovery.Setup(x => x.Register(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((RegisterEntertainmentResult?)null);
+        var mockLightSvc = new Mock<IHueLightService>();
+        mockLightSvc.Setup(x => x.RegisterBridgeAsync(It.IsAny<string>(), It.IsAny<string?>())).ReturnsAsync((string?)null);
 
         using var client = _factory.WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services => { services.AddSingleton(mockDiscovery.Object); })).CreateClient();
+            builder.ConfigureTestServices(services => { services.AddSingleton<IHueLightService>(mockLightSvc.Object); })).CreateClient();
 
-        var resp = await client.GetAsync("/hue/register?Ip=1.2.3.4&Key=abc", TestContext.Current.CancellationToken);
+        var content = JsonContent.Create(new { Ip = "1.2.3.4", Key = "abc" });
+        var resp = await client.PostAsync("/hue/register", content, TestContext.Current.CancellationToken);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task SetLight_ReturnsOk_WhenServiceSetsColor()
+    {
+        var mockLightSvc = new Mock<IHueLightService>();
+        var id = Guid.NewGuid();
+        mockLightSvc.Setup(s => s.SetLightColorAsync(id, "green", It.IsAny<int>())).ReturnsAsync(true);
+
+        using var client = _factory.WithWebHostBuilder(builder =>
+            builder.ConfigureTestServices(services => { services.AddSingleton<IHueLightService>(mockLightSvc.Object); })).CreateClient();
+
+        var content = JsonContent.Create(new { LightId = id, ColorName = "green", DurationMs = 10 });
+        var resp = await client.PostAsync("/hue/SetLight", content, TestContext.Current.CancellationToken);
+
+        resp.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task SetLight_ReturnsNotFound_WhenServiceFails()
+    {
+        var mockLightSvc = new Mock<IHueLightService>();
+        var id = Guid.NewGuid();
+        mockLightSvc.Setup(s => s.SetLightColorAsync(id, "red", It.IsAny<int>())).ReturnsAsync(false);
+
+        using var client = _factory.WithWebHostBuilder(builder =>
+            builder.ConfigureTestServices(services => { services.AddSingleton<IHueLightService>(mockLightSvc.Object); })).CreateClient();
+
+        var content = JsonContent.Create(new { LightId = id, ColorName = "red", DurationMs = 10 });
+        var resp = await client.PostAsync("/hue/SetLight", content, TestContext.Current.CancellationToken);
+
+        resp.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task SetLight_ReturnsBadRequest_WhenLightIdEmpty()
+    {
+        using var client = _factory.CreateClient();
+
+        var content = JsonContent.Create(new { LightId = Guid.Empty, ColorName = "green", DurationMs = 10 });
+        var resp = await client.PostAsync("/hue/SetLight", content, TestContext.Current.CancellationToken);
+
+        resp.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task SetPulsatingLight_ReturnsOk_WhenServicePulsates()
+    {
+        var mockLightSvc = new Mock<IHueLightService>();
+        var id = Guid.NewGuid();
+        mockLightSvc.Setup(s => s.FlashLightAsync(id, It.IsAny<int>())).ReturnsAsync(true);
+
+        using var client = _factory.WithWebHostBuilder(builder =>
+            builder.ConfigureTestServices(services => { services.AddSingleton<IHueLightService>(mockLightSvc.Object); })).CreateClient();
+
+        var content = JsonContent.Create(new { LightId = id, DurationMs = 100 });
+        var resp = await client.PostAsync("/hue/SetPulsatingLight", content, TestContext.Current.CancellationToken);
+
+        resp.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task SetPulsatingLight_ReturnsNotFound_WhenServiceFails()
+    {
+        var mockLightSvc = new Mock<IHueLightService>();
+        var id = Guid.NewGuid();
+        mockLightSvc.Setup(s => s.FlashLightAsync(id, It.IsAny<int>())).ReturnsAsync(false);
+
+        using var client = _factory.WithWebHostBuilder(builder =>
+            builder.ConfigureTestServices(services => { services.AddSingleton<IHueLightService>(mockLightSvc.Object); })).CreateClient();
+
+        var content = JsonContent.Create(new { LightId = id, DurationMs = 100 });
+        var resp = await client.PostAsync("/hue/SetPulsatingLight", content, TestContext.Current.CancellationToken);
+
+        resp.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task SetPulsatingLight_ReturnsBadRequest_WhenLightIdEmpty()
+    {
+        using var client = _factory.CreateClient();
+
+        var content = JsonContent.Create(new { LightId = Guid.Empty, DurationMs = 100 });
+        var resp = await client.PostAsync("/hue/SetPulsatingLight", content, TestContext.Current.CancellationToken);
+
+        resp.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     private class AuthorizationStartupFilter : IStartupFilter

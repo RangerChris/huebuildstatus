@@ -2,16 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using HueApi.ColorConverters;
+using HueBuildStatus.Core.Features.Config;
 
 namespace HueBuildStatus.Core.Features.Hue;
 
 public class HueLightService : IHueLightService
 {
     private readonly IHueDiscoveryService _discoveryService;
+    private readonly IAppConfiguration? _config;
 
-    public HueLightService(IHueDiscoveryService discoveryService)
+    public HueLightService(IHueDiscoveryService discoveryService, IAppConfiguration? config = null)
     {
         _discoveryService = discoveryService ?? throw new ArgumentNullException(nameof(discoveryService));
+        _config = config;
     }
 
     public async Task<string?> GetBridgeIpAsync(string? configuredBridgeIp = null)
@@ -19,6 +22,11 @@ public class HueLightService : IHueLightService
         if (!string.IsNullOrWhiteSpace(configuredBridgeIp))
         {
             return configuredBridgeIp;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_config?.BridgeIp))
+        {
+            return _config!.BridgeIp;
         }
 
         return await _discoveryService.DiscoverBridgeAsync();
@@ -29,6 +37,11 @@ public class HueLightService : IHueLightService
         if (!string.IsNullOrWhiteSpace(configuredBridgeKey))
         {
             return configuredBridgeKey;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_config?.BridgeKey))
+        {
+            return _config!.BridgeKey;
         }
 
         if (string.IsNullOrWhiteSpace(bridgeIp))
