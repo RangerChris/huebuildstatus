@@ -11,4 +11,7 @@ public interface IHueLightService
     Task<LightInfo?> GetLightByNameAsync(string name);
 
     Task<LightSnapshot?> CaptureLightSnapshotAsync(Guid lightId);
+
+    // Show a color (red, green, yellow) on the specified light for the given duration (ms), then restore the previous state
+    Task<bool> SetLightColorAsync(Guid lightId, string colorName, int showDurationMs = 2000);
 }

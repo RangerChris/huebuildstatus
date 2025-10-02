@@ -68,6 +68,12 @@ public class HueDiscoveryService : IHueDiscoveryService
         throw new NotImplementedException();
     }
 
+    public Task SetColorOfLamp(Guid lightId, RGBColor color)
+    {
+        // Minimal implementation to satisfy interface. Concrete behavior implemented in production code later.
+        return Task.CompletedTask;
+    }
+
     public Task PulsateAsync(Light light, RGBColor color, int cycles = 3, int periodMs = 1000, int steps = 20, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();

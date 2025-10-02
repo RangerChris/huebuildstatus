@@ -1,10 +1,11 @@
 using HueBuildStatus.Core.Features.Hue;
+using HueApi.ColorConverters;
 using Moq;
 using Shouldly;
 
 namespace HueBuildStatus.Tests;
 
-public class HueLightServiceTests
+public partial class HueLightServiceTests
 {
     [Fact]
     public async Task GetBridgeIpAsync_ReturnsConfiguredIp_WhenProvided()
@@ -224,5 +225,69 @@ public class HueLightServiceTests
         result.ShouldBeNull();
         mockDiscovery.Verify(d => d.GetAllLights(), Times.Never);
         mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task SetLightColorAsync_ReturnsFalse_WhenLightIdIsEmpty()
+    {
+        var mockDiscovery = new Mock<IHueDiscoveryService>();
+        var service = new HueLightService(mockDiscovery.Object);
+
+        var result = await service.SetLightColorAsync(Guid.Empty, "red", 10);
+
+        result.ShouldBeFalse();
+        mockDiscovery.Verify(d => d.GetAllLights(), Times.Never);
+    }
+
+    [Fact]
+    public async Task SetLightColorAsync_ReturnsFalse_WhenLightNotFound()
+    {
+        var mockDiscovery = new Mock<IHueDiscoveryService>();
+        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(new Dictionary<Guid, string> { { Guid.NewGuid(), "Other" } });
+
+        var service = new HueLightService(mockDiscovery.Object);
+
+        var result = await service.SetLightColorAsync(Guid.NewGuid(), "green", 10);
+
+        result.ShouldBeFalse();
+        mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
+        mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task SetLightColorAsync_ReturnsFalse_ForUnknownColor()
+    {
+        var mockDiscovery = new Mock<IHueDiscoveryService>();
+        var id = Guid.NewGuid();
+        var lights = new Dictionary<Guid, string> { { id, "Desk" } };
+        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+
+        var service = new HueLightService(mockDiscovery.Object);
+
+        var result = await service.SetLightColorAsync(id, "blueish", 10);
+
+        result.ShouldBeFalse();
+        mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
+        mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task SetLightColorAsync_CapturesSetsAndRestores_WhenColorIsValid()
+    {
+        var mockDiscovery = new Mock<IHueDiscoveryService>();
+        var id = Guid.NewGuid();
+        var lights = new Dictionary<Guid, string> { { id, "Desk" } };
+        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+        var snapshot = new LightSnapshot(id, "{\"on\":true}", DateTime.UtcNow);
+        mockDiscovery.Setup(d => d.CaptureLightSnapshotAsync(id)).ReturnsAsync(snapshot);
+
+        var service = new HueLightService(mockDiscovery.Object);
+
+        var result = await service.SetLightColorAsync(id, "green", 10);
+
+        result.ShouldBeTrue();
+        mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(id), Times.Once);
+        mockDiscovery.Verify(d => d.SetColorOfLamp(id, It.IsAny<RGBColor>()), Times.Once);
+        mockDiscovery.Verify(d => d.RestoreLightSnapshotAsync(snapshot, It.IsAny<int>()), Times.Once);
     }
 }

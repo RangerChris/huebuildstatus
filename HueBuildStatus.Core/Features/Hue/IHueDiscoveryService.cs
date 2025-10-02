@@ -11,6 +11,7 @@ public interface IHueDiscoveryService
     Task<string?> DiscoverBridgeAsync();
     Task<RegisterEntertainmentResult?> Register(string bridgeIp, string hueUser);
     Task SetColorOfLamp(Light light, RGBColor color);
+    Task SetColorOfLamp(Guid lightId, RGBColor color);
     Task PulsateAsync(Light light, RGBColor color, int cycles = 3, int periodMs = 1000, int steps = 20, CancellationToken cancellationToken = default);
     Task<Dictionary<Guid, string>?> GetAllLights();
     Task<LightSnapshot> CaptureLightSnapshotAsync(Guid lightId);

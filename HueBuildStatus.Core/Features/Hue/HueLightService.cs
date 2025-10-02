@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using HueApi.ColorConverters;
 
 namespace HueBuildStatus.Core.Features.Hue;
 
@@ -93,5 +94,78 @@ public class HueLightService : IHueLightService
         }
 
         return await _discoveryService.CaptureLightSnapshotAsync(lightId);
+    }
+
+    public async Task<bool> SetLightColorAsync(Guid lightId, string colorName, int showDurationMs = 2000)
+    {
+        if (lightId == Guid.Empty)
+        {
+            return false;
+        }
+
+        var lights = await _discoveryService.GetAllLights();
+        if (lights is null || lights.Count == 0)
+        {
+            return false;
+        }
+
+        if (!lights.ContainsKey(lightId))
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(colorName))
+        {
+            return false;
+        }
+
+        RGBColor color;
+        switch (colorName.Trim().ToLowerInvariant())
+        {
+            case "red":
+                color = new RGBColor(255, 0, 0);
+                break;
+            case "green":
+                color = new RGBColor(0, 255, 0);
+                break;
+            case "yellow":
+                color = new RGBColor(255, 255, 0);
+                break;
+            default:
+                return false;
+        }
+
+        LightSnapshot? snapshot = null;
+        try
+        {
+            snapshot = await _discoveryService.CaptureLightSnapshotAsync(lightId);
+            await _discoveryService.SetColorOfLamp(lightId, color);
+            if (showDurationMs > 0)
+            {
+                await Task.Delay(showDurationMs);
+            }
+            if (snapshot is not null)
+            {
+                await _discoveryService.RestoreLightSnapshotAsync(snapshot, 0);
+            }
+
+            return true;
+        }
+        catch
+        {
+            try
+            {
+                if (snapshot is not null)
+                {
+                    await _discoveryService.RestoreLightSnapshotAsync(snapshot, 0);
+                }
+            }
+            catch
+            {
+                // swallow
+            }
+
+            return false;
+        }
     }
 }
