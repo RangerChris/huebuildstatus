@@ -1,9 +1,9 @@
 using System.Net;
 using System.Text;
-using Shouldly;
 using HueBuildStatus.Core.Features.Hue;
 using Moq;
 using Moq.Protected;
+using Shouldly;
 
 namespace HueBuildStatus.Tests;
 

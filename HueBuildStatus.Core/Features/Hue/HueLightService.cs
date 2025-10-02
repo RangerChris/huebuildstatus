@@ -34,4 +34,15 @@ public class HueLightService : IHueLightService
         var deviceType = "huebuildstatus#app";
         return await _discoveryService.AuthenticateAsync(bridgeIp, deviceType);
     }
+
+    public async Task<Dictionary<Guid, string>> GetAllLightsAsync()
+    {
+        var lights = await _discoveryService.GetAllLights();
+        if (lights is null)
+        {
+            return new Dictionary<Guid, string>();
+        }
+
+        return lights;
+    }
 }

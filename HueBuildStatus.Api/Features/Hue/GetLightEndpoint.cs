@@ -1,5 +1,4 @@
 using FastEndpoints;
-using HueApi.ColorConverters;
 using HueApi.Models;
 using HueBuildStatus.Core.Features.Hue;
 
@@ -27,9 +26,9 @@ public class GetLightEndpoint(IHueLightService hue) : Endpoint<GetLightRequest, 
 
     public override async Task HandleAsync(GetLightRequest req, CancellationToken ct)
     {
-        await Send.OkAsync(new GetLightResponse()
+        await Send.OkAsync(new GetLightResponse
         {
             light = new Light()
-        }, cancellation: ct);
+        }, ct);
     }
 }

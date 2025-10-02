@@ -1,8 +1,6 @@
 using FastEndpoints;
-using HueBuildStatus.Core.Features.Hue;
 
 namespace HueBuildStatus.Api.Features.Hue;
-
 
 public class GetAllLightsEndpoint : EndpointWithoutRequest<AllLightsResponse>
 {
@@ -21,5 +19,5 @@ public class GetAllLightsEndpoint : EndpointWithoutRequest<AllLightsResponse>
 
 public class AllLightsResponse
 {
-    public Dictionary<Guid, string> NameList { get; set; } = new Dictionary<Guid, string>();
+    public Dictionary<Guid, string> NameList { get; set; } = new();
 }

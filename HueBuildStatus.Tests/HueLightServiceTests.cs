@@ -1,9 +1,6 @@
-using System;
-using System.Threading.Tasks;
+using HueBuildStatus.Core.Features.Hue;
 using Moq;
 using Shouldly;
-using Xunit;
-using HueBuildStatus.Core.Features.Hue;
 
 namespace HueBuildStatus.Tests;
 
@@ -29,7 +26,7 @@ public class HueLightServiceTests
 
         var service = new HueLightService(mockDiscovery.Object);
 
-        var result = await service.GetBridgeIpAsync(null);
+        var result = await service.GetBridgeIpAsync();
 
         result.ShouldBe("192.168.1.2");
         mockDiscovery.Verify(d => d.DiscoverBridgeAsync(), Times.Once);
@@ -43,7 +40,7 @@ public class HueLightServiceTests
 
         var service = new HueLightService(mockDiscovery.Object);
 
-        var result = await service.GetBridgeIpAsync(null);
+        var result = await service.GetBridgeIpAsync();
 
         result.ShouldBeNull();
         mockDiscovery.Verify(d => d.DiscoverBridgeAsync(), Times.Once);
@@ -69,7 +66,7 @@ public class HueLightServiceTests
 
         var service = new HueLightService(mockDiscovery.Object);
 
-        var result = await service.RegisterBridgeAsync("1.2.3.4", null);
+        var result = await service.RegisterBridgeAsync("1.2.3.4");
 
         result.ShouldBe("new-key");
         mockDiscovery.Verify(d => d.AuthenticateAsync("1.2.3.4", It.IsAny<string>()), Times.Once);
@@ -81,9 +78,43 @@ public class HueLightServiceTests
         var mockDiscovery = new Mock<IHueDiscoveryService>();
         var service = new HueLightService(mockDiscovery.Object);
 
-        var result = await service.RegisterBridgeAsync("", null);
+        var result = await service.RegisterBridgeAsync("");
 
         result.ShouldBeNull();
         mockDiscovery.Verify(d => d.AuthenticateAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetAllLightsAsync_ReturnsLights_WhenDiscoveryReturns()
+    {
+        var mockDiscovery = new Mock<IHueDiscoveryService>();
+        var id = Guid.NewGuid();
+        var lights = new Dictionary<Guid, string> { { id, "Desk" } };
+        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+
+        var service = new HueLightService(mockDiscovery.Object);
+
+        var result = await service.GetAllLightsAsync();
+
+        result.ShouldNotBeNull();
+        result.Count.ShouldBe(1);
+        result[id].ShouldBe("Desk");
+        mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetAllLightsAsync_ReturnsEmpty_WhenDiscoveryReturnsNull()
+    {
+        var mockDiscovery = new Mock<IHueDiscoveryService>();
+        // Return a Task with a null Dictionary to match the nullable return type
+        mockDiscovery.Setup(d => d.GetAllLights()).Returns(Task.FromResult<Dictionary<Guid, string>?>(null));
+
+        var service = new HueLightService(mockDiscovery.Object);
+
+        var result = await service.GetAllLightsAsync();
+
+        result.ShouldNotBeNull();
+        result.Count.ShouldBe(0);
+        mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
     }
 }

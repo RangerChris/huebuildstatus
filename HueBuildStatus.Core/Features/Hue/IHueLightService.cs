@@ -5,4 +5,6 @@ public interface IHueLightService
     Task<string?> GetBridgeIpAsync(string? configuredBridgeIp = null);
 
     Task<string?> RegisterBridgeAsync(string bridgeIp, string? configuredBridgeKey = null);
+
+    Task<Dictionary<Guid, string>> GetAllLightsAsync();
 }

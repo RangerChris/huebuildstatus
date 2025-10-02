@@ -7,11 +7,6 @@ namespace HueBuildStatus.Api.Features.Webhooks;
 
 public class GitHubPushEndpoint : Endpoint<GitHubPushPayload>
 {
-
-    public GitHubPushEndpoint()
-    {
-    }
-
     public override void Configure()
     {
         Post("/webhooks/github/push");
