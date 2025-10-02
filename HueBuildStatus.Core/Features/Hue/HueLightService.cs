@@ -73,4 +73,25 @@ public class HueLightService : IHueLightService
 
         return null;
     }
+
+    public async Task<LightSnapshot?> CaptureLightSnapshotAsync(Guid lightId)
+    {
+        if (lightId == Guid.Empty)
+        {
+            return null;
+        }
+
+        var lights = await _discoveryService.GetAllLights();
+        if (lights is null || lights.Count == 0)
+        {
+            return null;
+        }
+
+        if (!lights.ContainsKey(lightId))
+        {
+            return null;
+        }
+
+        return await _discoveryService.CaptureLightSnapshotAsync(lightId);
+    }
 }

@@ -176,4 +176,53 @@ public class HueLightServiceTests
         result.ShouldBeNull();
         mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
     }
+
+    [Fact]
+    public async Task CaptureLightSnapshotAsync_ReturnsSnapshot_WhenDiscoveryReturns()
+    {
+        var mockDiscovery = new Mock<IHueDiscoveryService>();
+        var id = Guid.NewGuid();
+        var lights = new Dictionary<Guid, string> { { id, "Desk" } };
+        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+        var snapshot = new LightSnapshot(id, "{\"on\":true}", DateTime.UtcNow);
+        mockDiscovery.Setup(d => d.CaptureLightSnapshotAsync(id)).ReturnsAsync(snapshot);
+
+        var service = new HueLightService(mockDiscovery.Object);
+
+        var result = await service.CaptureLightSnapshotAsync(id);
+
+        result.ShouldNotBeNull();
+        result!.LightId.ShouldBe(id);
+        result.JsonSnapshot.ShouldBe("{\"on\":true}");
+        mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(id), Times.Once);
+    }
+
+    [Fact]
+    public async Task CaptureLightSnapshotAsync_ReturnsNull_WhenLightNotFound()
+    {
+        var mockDiscovery = new Mock<IHueDiscoveryService>();
+        var existingId = Guid.NewGuid();
+        var lights = new Dictionary<Guid, string> { { existingId, "Other" } };
+        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+
+        var service = new HueLightService(mockDiscovery.Object);
+
+        var result = await service.CaptureLightSnapshotAsync(Guid.NewGuid());
+
+        result.ShouldBeNull();
+        mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task CaptureLightSnapshotAsync_ReturnsNull_WhenLightIdIsEmpty()
+    {
+        var mockDiscovery = new Mock<IHueDiscoveryService>();
+        var service = new HueLightService(mockDiscovery.Object);
+
+        var result = await service.CaptureLightSnapshotAsync(Guid.Empty);
+
+        result.ShouldBeNull();
+        mockDiscovery.Verify(d => d.GetAllLights(), Times.Never);
+        mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(It.IsAny<Guid>()), Times.Never);
+    }
 }

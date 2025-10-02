@@ -77,7 +77,7 @@ The project will be built in an agent mode, with code generated for approval aft
         *   **Task 1.3:** Write unit tests for and implement a `HueLightService` that discovers the bridge IP address, if the IP is not already provided in the appsettings.json. The IP is returned, but not stored anywhere. It's up to the user of the system to set it in appsettings.json using the setting 'bridgeKey' ✅
     *   **Task 1.4:** Extend `HueLightService` with a way to get a list of all available lights. The list has the id and name of the light. ✅
     *   **Task 1.5:** Extend `HueLightService` with a way to get a specific light, by providing the name of the light. ✅
-    *   **Task 1.6:** Extend `HueLightService` with a method to take a snapshot of the lights state.  ☐
+    *   **Task 1.6:** Extend `HueLightService` with a method to take a snapshot of the lights state.  ✅
     *   **Task 1.7:** Extend `HueLightService` with a method to set color (red, green, yellow). Brightness is always 100. Use previous snapshot method before setting the light and then show the color for 2 seconds, then restore the previous state again. ☐
     *   **Task 1.8:** Extend `HueLightService` with a method to flash the light (on/off/on/off) for 5 seconds. Use the same pattern to take snapshot and restore as in task 1.7 ☐
 
