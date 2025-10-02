@@ -74,6 +74,12 @@ public class HueDiscoveryService : IHueDiscoveryService
         return Task.CompletedTask;
     }
 
+    public Task SetOnState(Guid lightId, bool on)
+    {
+        // Minimal no-op to support unit tests of higher-level services.
+        return Task.CompletedTask;
+    }
+
     public Task PulsateAsync(Light light, RGBColor color, int cycles = 3, int periodMs = 1000, int steps = 20, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();

@@ -14,4 +14,7 @@ public interface IHueLightService
 
     // Show a color (red, green, yellow) on the specified light for the given duration (ms), then restore the previous state
     Task<bool> SetLightColorAsync(Guid lightId, string colorName, int showDurationMs = 2000);
+
+    // Flash the specified light (on/off/on/off) for the given duration (ms), then restore the previous state
+    Task<bool> FlashLightAsync(Guid lightId, int durationMs = 5000);
 }

@@ -78,8 +78,8 @@ The project will be built in an agent mode, with code generated for approval aft
     *   **Task 1.4:** Extend `HueLightService` with a way to get a list of all available lights. The list has the id and name of the light. ✅
     *   **Task 1.5:** Extend `HueLightService` with a way to get a specific light, by providing the name of the light. ✅
     *   **Task 1.6:** Extend `HueLightService` with a method to take a snapshot of the lights state.  ✅
-    *   **Task 1.7:** Extend `HueLightService` with a method to set color (red, green, yellow). Brightness is always 100. Use previous snapshot method before setting the light and then show the color for 2 seconds, then restore the previous state again. ☐
-    *   **Task 1.8:** Extend `HueLightService` with a method to flash the light (on/off/on/off) for 5 seconds. Use the same pattern to take snapshot and restore as in task 1.7 ☐
+    *   **Task 1.7:** Extend `HueLightService` with a method to set color (red, green, yellow). Brightness is always 100. Use previous snapshot method before setting the light and then show the color for 2 seconds, then restore the previous state again. ✅
+    *   **Task 1.8:** Extend `HueLightService` with a method to flash the light (on/off/on/off) for 5 seconds. Use the same pattern to take snapshot and restore as in task 1.7 ✅
 
 *   **Phase 2: Backend API with FastEndpoints**
     *   **Task 2.1:** Write a integration test for a simple `/health` endpoint that checks if we have a hue bridge ip and key and implement it. ☐

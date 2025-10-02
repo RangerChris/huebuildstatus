@@ -168,4 +168,72 @@ public class HueLightService : IHueLightService
             return false;
         }
     }
+
+    public async Task<bool> FlashLightAsync(Guid lightId, int durationMs = 5000)
+    {
+        if (lightId == Guid.Empty)
+        {
+            return false;
+        }
+
+        var lights = await _discoveryService.GetAllLights();
+        if (lights is null || lights.Count == 0)
+        {
+            return false;
+        }
+
+        if (!lights.ContainsKey(lightId))
+        {
+            return false;
+        }
+
+        LightSnapshot? snapshot = null;
+        try
+        {
+            snapshot = await _discoveryService.CaptureLightSnapshotAsync(lightId);
+
+            // Perform 4 toggles: on, off, on, off over the requested duration
+            var toggleCount = 4;
+            var interval = durationMs > 0 ? Math.Max(1, durationMs / toggleCount) : 0;
+
+            // on
+            await _discoveryService.SetOnState(lightId, true);
+            if (interval > 0) await Task.Delay(interval);
+
+            // off
+            await _discoveryService.SetOnState(lightId, false);
+            if (interval > 0) await Task.Delay(interval);
+
+            // on
+            await _discoveryService.SetOnState(lightId, true);
+            if (interval > 0) await Task.Delay(interval);
+
+            // off
+            await _discoveryService.SetOnState(lightId, false);
+            if (interval > 0) await Task.Delay(interval);
+
+            if (snapshot is not null)
+            {
+                await _discoveryService.RestoreLightSnapshotAsync(snapshot, 0);
+            }
+
+            return true;
+        }
+        catch
+        {
+            try
+            {
+                if (snapshot is not null)
+                {
+                    await _discoveryService.RestoreLightSnapshotAsync(snapshot, 0);
+                }
+            }
+            catch
+            {
+                // swallow
+            }
+
+            return false;
+        }
+    }
 }

@@ -290,4 +290,52 @@ public partial class HueLightServiceTests
         mockDiscovery.Verify(d => d.SetColorOfLamp(id, It.IsAny<RGBColor>()), Times.Once);
         mockDiscovery.Verify(d => d.RestoreLightSnapshotAsync(snapshot, It.IsAny<int>()), Times.Once);
     }
+
+    [Fact]
+    public async Task FlashLightAsync_ReturnsFalse_WhenLightIdIsEmpty()
+    {
+        var mockDiscovery = new Mock<IHueDiscoveryService>();
+        var service = new HueLightService(mockDiscovery.Object);
+
+        var result = await service.FlashLightAsync(Guid.Empty, 100);
+
+        result.ShouldBeFalse();
+        mockDiscovery.Verify(d => d.GetAllLights(), Times.Never);
+    }
+
+    [Fact]
+    public async Task FlashLightAsync_ReturnsFalse_WhenLightNotFound()
+    {
+        var mockDiscovery = new Mock<IHueDiscoveryService>();
+        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(new Dictionary<Guid, string> { { Guid.NewGuid(), "Other" } });
+
+        var service = new HueLightService(mockDiscovery.Object);
+
+        var result = await service.FlashLightAsync(Guid.NewGuid(), 100);
+
+        result.ShouldBeFalse();
+        mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
+        mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task FlashLightAsync_TogglesAndRestores_WhenSuccessful()
+    {
+        var mockDiscovery = new Mock<IHueDiscoveryService>();
+        var id = Guid.NewGuid();
+        var lights = new Dictionary<Guid, string> { { id, "Desk" } };
+        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+        var snapshot = new LightSnapshot(id, "{\"on\":true}", DateTime.UtcNow);
+        mockDiscovery.Setup(d => d.CaptureLightSnapshotAsync(id)).ReturnsAsync(snapshot);
+
+        var service = new HueLightService(mockDiscovery.Object);
+
+        var result = await service.FlashLightAsync(id, 200);
+
+        result.ShouldBeTrue();
+        mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(id), Times.Once);
+        mockDiscovery.Verify(d => d.SetOnState(id, true), Times.Exactly(2));
+        mockDiscovery.Verify(d => d.SetOnState(id, false), Times.Exactly(2));
+        mockDiscovery.Verify(d => d.RestoreLightSnapshotAsync(snapshot, It.IsAny<int>()), Times.Once);
+    }
 }
