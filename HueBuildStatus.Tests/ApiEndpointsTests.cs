@@ -1,9 +1,10 @@
 using System.Net;
+using System.Text;
+using HueBuildStatus.Core.Features.Hue;
 using Microsoft.Extensions.Configuration;
-using Shouldly;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using HueBuildStatus.Core.Features.Hue;
+using Shouldly;
 
 namespace HueBuildStatus.Tests;
 
@@ -24,7 +25,7 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
         {
             builder.ConfigureAppConfiguration((context, conf) =>
             {
-                conf.AddInMemoryCollection(new KeyValuePair<string, string?>[]
+                conf.AddInMemoryCollection(new[]
                 {
                     new KeyValuePair<string, string?>("bridgeIp", "192.168.1.100"),
                     new KeyValuePair<string, string?>("bridgeKey", "test-key")
@@ -68,13 +69,7 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
         var lights = new Dictionary<Guid, string> { { id, "Desk" } };
         mockLightSvc.Setup(s => s.GetAllLightsAsync()).ReturnsAsync(lights);
 
-        var configuredFactory = _factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                services.AddSingleton<IHueLightService>(mockLightSvc.Object);
-            });
-        });
+        var configuredFactory = _factory.WithWebHostBuilder(builder => { builder.ConfigureServices(services => { services.AddSingleton(mockLightSvc.Object); }); });
 
         using var client = configuredFactory.CreateClient();
 
@@ -93,19 +88,13 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
         var mockLightSvc = new Mock<IHueLightService>();
         mockLightSvc.Setup(s => s.GetBridgeIpAsync(It.IsAny<string?>())).ReturnsAsync("192.168.1.2");
 
-        var configuredFactory = _factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                services.AddSingleton<IHueLightService>(mockLightSvc.Object);
-            });
-        });
+        var configuredFactory = _factory.WithWebHostBuilder(builder => { builder.ConfigureServices(services => { services.AddSingleton(mockLightSvc.Object); }); });
 
         using var client = configuredFactory.CreateClient();
 
         var resp = await client.GetAsync("/hue/discover", TestContext.Current.CancellationToken);
 
-        resp.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        resp.StatusCode.ShouldBe(HttpStatusCode.OK);
         var body = await resp.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         body.ShouldBe("\"192.168.1.2\"");
     }
@@ -116,19 +105,13 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
         var mockLightSvc = new Mock<IHueLightService>();
         mockLightSvc.Setup(s => s.GetBridgeIpAsync(It.IsAny<string?>())).ReturnsAsync((string?)null);
 
-        var configuredFactory = _factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                services.AddSingleton<IHueLightService>(mockLightSvc.Object);
-            });
-        });
+        var configuredFactory = _factory.WithWebHostBuilder(builder => { builder.ConfigureServices(services => { services.AddSingleton(mockLightSvc.Object); }); });
 
         using var client = configuredFactory.CreateClient();
 
         var resp = await client.GetAsync("/hue/discover", TestContext.Current.CancellationToken);
 
-        resp.StatusCode.ShouldBe(System.Net.HttpStatusCode.NotFound);
+        resp.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -137,10 +120,10 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
         var configuredFactory = _factory.WithWebHostBuilder(builder => { });
         using var client = configuredFactory.CreateClient();
 
-        var content = new StringContent("{ \"Ip\": \"\", \"Key\": \"k\" }", System.Text.Encoding.UTF8, "application/json");
+        var content = new StringContent("{ \"Ip\": \"\", \"Key\": \"k\" }", Encoding.UTF8, "application/json");
         var resp = await client.PostAsync("/hue/register", content, TestContext.Current.CancellationToken);
 
-        resp.StatusCode.ShouldBe(System.Net.HttpStatusCode.BadRequest);
+        resp.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
     [Fact]
@@ -149,20 +132,14 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
         var mockLightSvc = new Mock<IHueLightService>();
         mockLightSvc.Setup(s => s.RegisterBridgeAsync(It.IsAny<string>(), It.IsAny<string?>())).ReturnsAsync("new-key");
 
-        var configuredFactory = _factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                services.AddSingleton<IHueLightService>(mockLightSvc.Object);
-            });
-        });
+        var configuredFactory = _factory.WithWebHostBuilder(builder => { builder.ConfigureServices(services => { services.AddSingleton(mockLightSvc.Object); }); });
 
         using var client = configuredFactory.CreateClient();
 
-        var content = new StringContent("{ \"Ip\": \"1.2.3.4\", \"Key\": null }", System.Text.Encoding.UTF8, "application/json");
+        var content = new StringContent("{ \"Ip\": \"1.2.3.4\", \"Key\": null }", Encoding.UTF8, "application/json");
         var resp = await client.PostAsync("/hue/register", content, TestContext.Current.CancellationToken);
 
-        resp.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        resp.StatusCode.ShouldBe(HttpStatusCode.OK);
         var body = await resp.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         body.ShouldBe("\"new-key\"");
     }
@@ -173,20 +150,14 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
         var mockLightSvc = new Mock<IHueLightService>();
         mockLightSvc.Setup(s => s.RegisterBridgeAsync(It.IsAny<string>(), It.IsAny<string?>())).ReturnsAsync((string?)null);
 
-        var configuredFactory = _factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                services.AddSingleton<IHueLightService>(mockLightSvc.Object);
-            });
-        });
+        var configuredFactory = _factory.WithWebHostBuilder(builder => { builder.ConfigureServices(services => { services.AddSingleton(mockLightSvc.Object); }); });
 
         using var client = configuredFactory.CreateClient();
 
-        var content = new StringContent("{ \"Ip\": \"1.2.3.4\", \"Key\": null }", System.Text.Encoding.UTF8, "application/json");
+        var content = new StringContent("{ \"Ip\": \"1.2.3.4\", \"Key\": null }", Encoding.UTF8, "application/json");
         var resp = await client.PostAsync("/hue/register", content, TestContext.Current.CancellationToken);
 
-        resp.StatusCode.ShouldBe(System.Net.HttpStatusCode.NotFound);
+        resp.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -197,17 +168,11 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
         var info = new LightInfo { Id = id, Name = "Desk Lamp" };
         mockLightSvc.Setup(s => s.GetLightByNameAsync(It.IsAny<string>())).ReturnsAsync(info);
 
-        var configuredFactory = _factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                services.AddSingleton<IHueLightService>(mockLightSvc.Object);
-            });
-        });
+        var configuredFactory = _factory.WithWebHostBuilder(builder => { builder.ConfigureServices(services => { services.AddSingleton(mockLightSvc.Object); }); });
 
         using var client = configuredFactory.CreateClient();
 
-        var resp = await client.GetAsync($"/hue/getlight?lightName=Desk Lamp", TestContext.Current.CancellationToken);
+        var resp = await client.GetAsync("/hue/getlight?lightName=Desk Lamp", TestContext.Current.CancellationToken);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.OK);
         var json = await resp.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
@@ -220,17 +185,11 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
         var mockLightSvc = new Mock<IHueLightService>();
         mockLightSvc.Setup(s => s.GetLightByNameAsync(It.IsAny<string>())).ReturnsAsync((LightInfo?)null);
 
-        var configuredFactory = _factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                services.AddSingleton<IHueLightService>(mockLightSvc.Object);
-            });
-        });
+        var configuredFactory = _factory.WithWebHostBuilder(builder => { builder.ConfigureServices(services => { services.AddSingleton(mockLightSvc.Object); }); });
 
         using var client = configuredFactory.CreateClient();
 
-        var resp = await client.GetAsync($"/hue/getlight?lightName=Missing", TestContext.Current.CancellationToken);
+        var resp = await client.GetAsync("/hue/getlight?lightName=Missing", TestContext.Current.CancellationToken);
 
         resp.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }

@@ -1,6 +1,5 @@
 using FastEndpoints;
 using HueBuildStatus.Core.Features.Config;
-using Microsoft.AspNetCore.Http;
 
 namespace HueBuildStatus.Api.Features.Health;
 
@@ -30,22 +29,29 @@ public class HealthEndpoint : EndpointWithoutRequest
             var bridgeKey = _config.BridgeKey;
 
             var missing = new List<string>();
-            if (string.IsNullOrWhiteSpace(bridgeIp)) missing.Add("bridgeIp");
-            if (string.IsNullOrWhiteSpace(bridgeKey)) missing.Add("bridgeKey");
+            if (string.IsNullOrWhiteSpace(bridgeIp))
+            {
+                missing.Add("bridgeIp");
+            }
+
+            if (string.IsNullOrWhiteSpace(bridgeKey))
+            {
+                missing.Add("bridgeKey");
+            }
 
             if (missing.Count == 0)
             {
-                await Send.OkAsync(new { status = "Healthy" }, cancellation: ct);
+                await Send.OkAsync(new { status = "Healthy" }, ct);
                 return;
             }
 
             HttpContext.Response.StatusCode = 503;
-            await HttpContext.Response.WriteAsJsonAsync(new { status = "Unhealthy", missing }, cancellationToken: ct);
+            await HttpContext.Response.WriteAsJsonAsync(new { status = "Unhealthy", missing }, ct);
         }
         catch (Exception ex)
         {
             HttpContext.Response.StatusCode = 503;
-            await HttpContext.Response.WriteAsJsonAsync(new { status = "Unhealthy", error = ex.Message }, cancellationToken: ct);
+            await HttpContext.Response.WriteAsJsonAsync(new { status = "Unhealthy", error = ex.Message }, ct);
         }
     }
 }

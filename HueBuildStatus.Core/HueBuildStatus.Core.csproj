@@ -9,12 +9,12 @@
     <ItemGroup>
         <PackageReference Include="HueApi" Version="3.0.0"/>
         <PackageReference Include="HueApi.ColorConverters" Version="3.0.0"/>
-        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="Microsoft.Extensions.Configuration.Abstractions">
-        <HintPath>C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\9.0.9\Microsoft.Extensions.Configuration.Abstractions.dll</HintPath>
-      </Reference>
+        <Reference Include="Microsoft.Extensions.Configuration.Abstractions">
+            <HintPath>C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\9.0.9\Microsoft.Extensions.Configuration.Abstractions.dll</HintPath>
+        </Reference>
     </ItemGroup>
 </Project>

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using HueApi.ColorConverters;
 using HueBuildStatus.Core.Features.Config;
 
@@ -8,8 +5,8 @@ namespace HueBuildStatus.Core.Features.Hue;
 
 public class HueLightService : IHueLightService
 {
-    private readonly IHueDiscoveryService _discoveryService;
     private readonly IAppConfiguration? _config;
+    private readonly IHueDiscoveryService _discoveryService;
 
     public HueLightService(IHueDiscoveryService discoveryService, IAppConfiguration? config = null)
     {
@@ -157,9 +154,10 @@ public class HueLightService : IHueLightService
             {
                 await Task.Delay(showDurationMs);
             }
+
             if (snapshot is not null)
             {
-                await _discoveryService.RestoreLightSnapshotAsync(snapshot, 0);
+                await _discoveryService.RestoreLightSnapshotAsync(snapshot);
             }
 
             return true;
@@ -170,7 +168,7 @@ public class HueLightService : IHueLightService
             {
                 if (snapshot is not null)
                 {
-                    await _discoveryService.RestoreLightSnapshotAsync(snapshot, 0);
+                    await _discoveryService.RestoreLightSnapshotAsync(snapshot);
                 }
             }
             catch
@@ -211,23 +209,35 @@ public class HueLightService : IHueLightService
 
             // on
             await _discoveryService.SetOnState(lightId, true);
-            if (interval > 0) await Task.Delay(interval);
+            if (interval > 0)
+            {
+                await Task.Delay(interval);
+            }
 
             // off
             await _discoveryService.SetOnState(lightId, false);
-            if (interval > 0) await Task.Delay(interval);
+            if (interval > 0)
+            {
+                await Task.Delay(interval);
+            }
 
             // on
             await _discoveryService.SetOnState(lightId, true);
-            if (interval > 0) await Task.Delay(interval);
+            if (interval > 0)
+            {
+                await Task.Delay(interval);
+            }
 
             // off
             await _discoveryService.SetOnState(lightId, false);
-            if (interval > 0) await Task.Delay(interval);
+            if (interval > 0)
+            {
+                await Task.Delay(interval);
+            }
 
             if (snapshot is not null)
             {
-                await _discoveryService.RestoreLightSnapshotAsync(snapshot, 0);
+                await _discoveryService.RestoreLightSnapshotAsync(snapshot);
             }
 
             return true;
@@ -238,7 +248,7 @@ public class HueLightService : IHueLightService
             {
                 if (snapshot is not null)
                 {
-                    await _discoveryService.RestoreLightSnapshotAsync(snapshot, 0);
+                    await _discoveryService.RestoreLightSnapshotAsync(snapshot);
                 }
             }
             catch

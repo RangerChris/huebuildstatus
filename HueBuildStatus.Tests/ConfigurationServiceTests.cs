@@ -1,6 +1,6 @@
+using HueBuildStatus.Core.Features.Config;
 using Microsoft.Extensions.Configuration;
 using Shouldly;
-using HueBuildStatus.Core.Features.Config;
 
 namespace HueBuildStatus.Tests;
 

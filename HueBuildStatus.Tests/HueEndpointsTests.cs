@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using HueApi.Models.Clip;
 using HueBuildStatus.Core.Features.Hue;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -22,7 +21,7 @@ public class HueEndpointsTests
         mockDiscovery.Setup(x => x.DiscoverBridgeAsync()).ReturnsAsync("192.168.1.100");
 
         using var client = _factory.WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services => { services.AddSingleton<IHueDiscoveryService>(mockDiscovery.Object); })).CreateClient();
+            builder.ConfigureTestServices(services => { services.AddSingleton(mockDiscovery.Object); })).CreateClient();
 
         var resp = await client.GetAsync("/hue/discover", TestContext.Current.CancellationToken);
 
@@ -52,7 +51,7 @@ public class HueEndpointsTests
         mockLightSvc.Setup(x => x.RegisterBridgeAsync(It.IsAny<string>(), It.IsAny<string?>())).ReturnsAsync("new-key");
 
         using var client = _factory.WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services => { services.AddSingleton<IHueLightService>(mockLightSvc.Object); })).CreateClient();
+            builder.ConfigureTestServices(services => { services.AddSingleton(mockLightSvc.Object); })).CreateClient();
 
         var content = JsonContent.Create(new { Ip = "1.2.3.4", Key = "abc" });
         var resp = await client.PostAsync("/hue/register", content, TestContext.Current.CancellationToken);
@@ -67,7 +66,7 @@ public class HueEndpointsTests
         mockLightSvc.Setup(x => x.RegisterBridgeAsync(It.IsAny<string>(), It.IsAny<string?>())).ReturnsAsync((string?)null);
 
         using var client = _factory.WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services => { services.AddSingleton<IHueLightService>(mockLightSvc.Object); })).CreateClient();
+            builder.ConfigureTestServices(services => { services.AddSingleton(mockLightSvc.Object); })).CreateClient();
 
         var content = JsonContent.Create(new { Ip = "1.2.3.4", Key = "abc" });
         var resp = await client.PostAsync("/hue/register", content, TestContext.Current.CancellationToken);
@@ -83,7 +82,7 @@ public class HueEndpointsTests
         mockLightSvc.Setup(s => s.SetLightColorAsync(id, "green", It.IsAny<int>())).ReturnsAsync(true);
 
         using var client = _factory.WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services => { services.AddSingleton<IHueLightService>(mockLightSvc.Object); })).CreateClient();
+            builder.ConfigureTestServices(services => { services.AddSingleton(mockLightSvc.Object); })).CreateClient();
 
         var content = JsonContent.Create(new { LightId = id, ColorName = "green", DurationMs = 10 });
         var resp = await client.PostAsync("/hue/SetLight", content, TestContext.Current.CancellationToken);
@@ -99,7 +98,7 @@ public class HueEndpointsTests
         mockLightSvc.Setup(s => s.SetLightColorAsync(id, "red", It.IsAny<int>())).ReturnsAsync(false);
 
         using var client = _factory.WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services => { services.AddSingleton<IHueLightService>(mockLightSvc.Object); })).CreateClient();
+            builder.ConfigureTestServices(services => { services.AddSingleton(mockLightSvc.Object); })).CreateClient();
 
         var content = JsonContent.Create(new { LightId = id, ColorName = "red", DurationMs = 10 });
         var resp = await client.PostAsync("/hue/SetLight", content, TestContext.Current.CancellationToken);
@@ -126,7 +125,7 @@ public class HueEndpointsTests
         mockLightSvc.Setup(s => s.FlashLightAsync(id, It.IsAny<int>())).ReturnsAsync(true);
 
         using var client = _factory.WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services => { services.AddSingleton<IHueLightService>(mockLightSvc.Object); })).CreateClient();
+            builder.ConfigureTestServices(services => { services.AddSingleton(mockLightSvc.Object); })).CreateClient();
 
         var content = JsonContent.Create(new { LightId = id, DurationMs = 100 });
         var resp = await client.PostAsync("/hue/SetPulsatingLight", content, TestContext.Current.CancellationToken);
@@ -142,7 +141,7 @@ public class HueEndpointsTests
         mockLightSvc.Setup(s => s.FlashLightAsync(id, It.IsAny<int>())).ReturnsAsync(false);
 
         using var client = _factory.WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services => { services.AddSingleton<IHueLightService>(mockLightSvc.Object); })).CreateClient();
+            builder.ConfigureTestServices(services => { services.AddSingleton(mockLightSvc.Object); })).CreateClient();
 
         var content = JsonContent.Create(new { LightId = id, DurationMs = 100 });
         var resp = await client.PostAsync("/hue/SetPulsatingLight", content, TestContext.Current.CancellationToken);

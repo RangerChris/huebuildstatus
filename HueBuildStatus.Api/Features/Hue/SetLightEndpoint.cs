@@ -1,6 +1,4 @@
 using FastEndpoints;
-using HueApi.ColorConverters;
-using HueApi.Models;
 using HueBuildStatus.Core.Features.Hue;
 
 namespace HueBuildStatus.Api.Features.Hue;

@@ -1,11 +1,11 @@
-using HueBuildStatus.Core.Features.Hue;
 using HueApi.ColorConverters;
+using HueBuildStatus.Core.Features.Hue;
 using Moq;
 using Shouldly;
 
 namespace HueBuildStatus.Tests;
 
-public partial class HueLightServiceTests
+public class HueLightServiceTests
 {
     [Fact]
     public async Task GetBridgeIpAsync_ReturnsConfiguredIp_WhenProvided()
