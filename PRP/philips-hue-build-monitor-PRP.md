@@ -93,7 +93,7 @@ The project will be built in an agent mode, with code generated for approval aft
 *   **Phase 3: Integration and Configuration**
     *   **Task 3.1:** Write tests for and implement a configuration service to load settings from `appsettings.json`. ✅
     *   **Task 3.2:** Refactor the application to use the configuration service and integrate the `HueLightService` with the API endpoints. ✅
-    *   **Task 3.3:** Perform manual end-to-end testing with ngrok and a real GitHub webhook. ☐
+    *   **Task 3.3:** Perform manual end-to-end testing with ngrok and a real GitHub webhook. ✅
     *   **Task 3.4:** Perform manual end-to-end testing with ngrok and a real Azure DevOps service hook. ☐
 
 *   **Phase 4: Error Handling and Refinement**
