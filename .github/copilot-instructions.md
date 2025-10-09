@@ -48,6 +48,7 @@ Testing:
 Security and secrets:
 - Never suggest or insert secrets (API keys, tokens) into repository files. Use configuration and environment variables.
 - Add guidance to use appsettings.Development.json for local examples only, but never commit real credentials.
+- Use .gitignore to exclude sensitive files.
 
 Files and folders to avoid editing:
 - bin/, obj/, .vs/, Rider files, and files generated at build/runtime.
