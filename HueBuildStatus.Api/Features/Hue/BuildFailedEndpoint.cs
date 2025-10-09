@@ -10,8 +10,6 @@ public class BuildFailedRequest
 
 public class BuildFailedEndpoint(IHueLightService hue) : Endpoint<BuildFailedRequest>
 {
-    private readonly IHueLightService _hue = hue;
-
     public override void Configure()
     {
         Post("/hue/BuildFailed");
@@ -27,7 +25,7 @@ public class BuildFailedEndpoint(IHueLightService hue) : Endpoint<BuildFailedReq
             return;
         }
 
-        var ok = await _hue.SetLightColorAsync(req.LightId, "red", 5000);
+        var ok = await hue.SetLightColorAsync(req.LightId, "red", 5000);
         if (!ok)
         {
             await Send.NotFoundAsync(ct);

@@ -11,8 +11,6 @@ public class BuildStartRequest
 
 public class BuildStartEndpoint(IHueLightService hue) : Endpoint<BuildStartRequest>
 {
-    private readonly IHueLightService _hue = hue;
-
     public override void Configure()
     {
         Post("/hue/BuildStart");
@@ -28,7 +26,7 @@ public class BuildStartEndpoint(IHueLightService hue) : Endpoint<BuildStartReque
             return;
         }
 
-        var ok = await _hue.FlashLightAsync(req.LightId, req.DurationMs);
+        var ok = await hue.FlashLightAsync(req.LightId, req.DurationMs);
         if (!ok)
         {
             await Send.NotFoundAsync(ct);

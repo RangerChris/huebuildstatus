@@ -10,8 +10,6 @@ public class BuildSuccessRequest
 
 public class BuildSuccessEndpoint(IHueLightService hue) : Endpoint<BuildSuccessRequest>
 {
-    private readonly IHueLightService _hue = hue;
-
     public override void Configure()
     {
         Post("/hue/BuildSuccess");
@@ -27,7 +25,7 @@ public class BuildSuccessEndpoint(IHueLightService hue) : Endpoint<BuildSuccessR
             return;
         }
 
-        var ok = await _hue.SetLightColorAsync(req.LightId, "green", 5000);
+        var ok = await hue.SetLightColorAsync(req.LightId, "green", 5000);
         if (!ok)
         {
             await Send.NotFoundAsync(ct);

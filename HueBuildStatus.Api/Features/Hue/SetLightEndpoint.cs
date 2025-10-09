@@ -12,8 +12,6 @@ public class SetLightRequest
 
 public class SetLightEndpoint(IHueLightService hue) : Endpoint<SetLightRequest>
 {
-    private readonly IHueLightService _hue = hue;
-
     public override void Configure()
     {
         Post("/hue/SetLight");
@@ -29,7 +27,7 @@ public class SetLightEndpoint(IHueLightService hue) : Endpoint<SetLightRequest>
             return;
         }
 
-        var ok = await _hue.SetLightColorAsync(req.LightId, req.ColorName!, req.DurationMs);
+        var ok = await hue.SetLightColorAsync(req.LightId, req.ColorName!, req.DurationMs);
         if (!ok)
         {
             await Send.NotFoundAsync(ct);

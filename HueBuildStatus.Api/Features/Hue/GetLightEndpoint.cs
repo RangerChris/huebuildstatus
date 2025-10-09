@@ -10,8 +10,6 @@ public class GetLightRequest
 
 public class GetLightEndpoint(IHueLightService hue) : Endpoint<GetLightRequest, LightInfo>
 {
-    private readonly IHueLightService _hue = hue;
-
     public override void Configure()
     {
         Get("/hue/getlight");
@@ -27,7 +25,7 @@ public class GetLightEndpoint(IHueLightService hue) : Endpoint<GetLightRequest, 
             return;
         }
 
-        var info = await _hue.GetLightByNameAsync(req.lightName);
+        var info = await hue.GetLightByNameAsync(req.lightName);
         if (info is null)
         {
             await Send.NotFoundAsync(ct);
