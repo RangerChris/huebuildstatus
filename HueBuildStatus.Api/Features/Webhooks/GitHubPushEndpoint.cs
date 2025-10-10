@@ -12,6 +12,39 @@ public class GitHubPushEndpoint(ILogger<GitHubPushEndpoint> logger) : EndpointWi
         Description(s => s.WithSummary("Receive GitHub webhook").WithDescription("Logs all received GitHub webhook information."));
     }
 
+    private static string? FindJsonProperty(JsonElement element, string propertyName)
+    {
+        if (element.ValueKind == JsonValueKind.Object)
+        {
+            foreach (var property in element.EnumerateObject())
+            {
+                if (property.NameEquals(propertyName))
+                {
+                    return property.Value.GetString();
+                }
+
+                var nestedResult = FindJsonProperty(property.Value, propertyName);
+                if (nestedResult != null)
+                {
+                    return nestedResult;
+                }
+            }
+        }
+        else if (element.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var item in element.EnumerateArray())
+            {
+                var nestedResult = FindJsonProperty(item, propertyName);
+                if (nestedResult != null)
+                {
+                    return nestedResult;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public override async Task HandleAsync(CancellationToken ct)
     {
         string req;
@@ -36,8 +69,13 @@ public class GitHubPushEndpoint(ILogger<GitHubPushEndpoint> logger) : EndpointWi
                 await Send.ErrorsAsync(400, ct);
                 return;
             }
-            logger.LogInformation("Deserialized payload: {Payload}", req);
-            await Send.OkAsync(cancellation: ct);
+
+            var status = FindJsonProperty(doc.RootElement, "status");
+            var conclusion = FindJsonProperty(doc.RootElement, "conclusion");
+
+            logger.LogInformation("Status: {Status}, Conclusion: {Conclusion}", status, conclusion);
+
+            await Send.OkAsync(new { status, conclusion }, cancellation: ct);
         }
         catch (JsonException)
         {

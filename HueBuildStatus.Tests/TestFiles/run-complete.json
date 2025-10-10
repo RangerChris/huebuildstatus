@@ -1,0 +1,54 @@
+{
+  "action": "completed",
+  "check_run": {
+    "id": 0,
+    "name": "build-and-test",
+    "node_id": "[redacted-node-id]",
+    "head_sha": "[redacted-head-sha]",
+    "external_id": "[redacted-external-id]",
+    "url": "[redacted-url]",
+    "html_url": "[redacted-html-url]",
+    "details_url": "[redacted-details-url]",
+    "status": "completed",
+    "conclusion": "success",
+    "started_at": "2025-10-09T21:18:27Z",
+    "completed_at": "2025-10-09T21:19:05Z",
+    "output": {
+      "title": null,
+      "summary": null,
+      "text": null,
+      "annotations_count": 0,
+      "annotations_url": "[redacted-annotations-url]"
+    },
+    "check_suite": {
+      "id": 0,
+      "node_id": "[redacted-node-id]",
+      "head_branch": "main",
+      "head_sha": "[redacted-head-sha]",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "[redacted-url]",
+      "before": "[redacted-before-sha]",
+      "after": "[redacted-after-sha]",
+      "pull_requests": [],
+      "app": {
+        "id": 0,
+        "client_id": "[redacted-client-id]",
+        "slug": "github-actions",
+        "node_id": "[redacted-node-id]",
+        "owner": {
+          "login": "[redacted-login]",
+          "id": 0,
+          "node_id": "[redacted-node-id]",
+          "avatar_url": "[redacted-avatar-url]",
+          "gravatar_id": "",
+          "url": "[redacted-url]",
+          "html_url": "[redacted-html-url]",
+          "followers_url": "[redacted-followers-url]",
+          "following_url": "[redacted-following-url]",
+          "gists_url": "[redacted-gists-url]"
+        }
+      }
+    }
+  }
+}

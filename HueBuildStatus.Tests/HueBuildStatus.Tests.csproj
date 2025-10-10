@@ -38,4 +38,16 @@
         <ProjectReference Include="..\HueBuildStatus.Core\HueBuildStatus.Core.csproj"/>
         <ProjectReference Include="..\HueBuildStatus.Api\HueBuildStatus.Api.csproj"/>
     </ItemGroup>
+
+    <ItemGroup>
+      <None Update="TestFiles\push.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="TestFiles\run-complete.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="TestFiles\workflow-complete.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 </Project>
