@@ -5,7 +5,7 @@ namespace HueBuildStatus.Api.Features.Hue;
 
 public class BuildFailedRequest
 {
-    public Guid LightId { get; set; }
+    public Guid LightId { get; init; }
 }
 
 public class BuildFailedEndpoint(IHueLightService hue) : Endpoint<BuildFailedRequest>

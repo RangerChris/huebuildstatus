@@ -4,7 +4,7 @@ using HueApi.Models.Clip;
 
 namespace HueBuildStatus.Core.Features.Hue;
 
-public record LightSnapshot(Guid LightId, string JsonSnapshot, DateTime CreatedUtc);
+public record LightSnapshot(Guid LightId, string JsonSnapshot);
 
 public interface IHueDiscoveryService
 {

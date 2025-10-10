@@ -10,25 +10,17 @@ using HueBuildStatus.Core.Features.Config;
 
 namespace HueBuildStatus.Core.Features.Hue;
 
-public class HueDiscoveryService : IHueDiscoveryService
+public class HueDiscoveryService(HttpClient? httpClient = null, string? discoveryUrl = null, IAppConfiguration? config = null) : IHueDiscoveryService
 {
-    private readonly IAppConfiguration? _config;
-    private readonly string _discoveryUrl;
-    private readonly HttpClient _httpClient;
-
-    public HueDiscoveryService(HttpClient? httpClient = null, string? discoveryUrl = null, IAppConfiguration? config = null)
-    {
-        _httpClient = httpClient ?? new HttpClient();
-        _discoveryUrl = discoveryUrl ?? "https://discovery.meethue.com/";
-        _config = config;
-    }
+    private readonly string _discoveryUrl = discoveryUrl ?? "https://discovery.meethue.com/";
+    private readonly HttpClient _httpClient = httpClient ?? new HttpClient();
 
     public async Task<string?> DiscoverBridgeAsync()
     {
         // If configured explicitly, prefer that
-        if (!string.IsNullOrWhiteSpace(_config?.BridgeIp))
+        if (!string.IsNullOrWhiteSpace(config?.BridgeIp))
         {
-            return _config!.BridgeIp;
+            return config!.BridgeIp;
         }
 
         try
@@ -93,10 +85,7 @@ public class HueDiscoveryService : IHueDiscoveryService
 
     public async Task SetColorOfLamp(Light light, RGBColor color)
     {
-        if (light == null)
-        {
-            throw new ArgumentNullException(nameof(light));
-        }
+        ArgumentNullException.ThrowIfNull(light);
 
         var client = await CreateClientAsync();
         if (client == null)
@@ -151,10 +140,7 @@ public class HueDiscoveryService : IHueDiscoveryService
 
     public async Task PulsateAsync(Light light, RGBColor color, int cycles = 3, int periodMs = 1000, int steps = 20, CancellationToken cancellationToken = default)
     {
-        if (light == null)
-        {
-            throw new ArgumentNullException(nameof(light));
-        }
+        ArgumentNullException.ThrowIfNull(light);
 
         var client = await CreateClientAsync();
         if (client == null)
@@ -261,15 +247,12 @@ public class HueDiscoveryService : IHueDiscoveryService
         }
 
         var json = JsonSerializer.Serialize(light, new JsonSerializerOptions { WriteIndented = false });
-        return new LightSnapshot(lightId, json, DateTime.UtcNow);
+        return new LightSnapshot(lightId, json);
     }
 
     public async Task RestoreLightSnapshotAsync(LightSnapshot snapshot, int transitionMs = 0)
     {
-        if (snapshot == null)
-        {
-            throw new ArgumentNullException(nameof(snapshot));
-        }
+        ArgumentNullException.ThrowIfNull(snapshot);
 
         var client = await CreateClientAsync();
         if (client == null)
@@ -405,7 +388,7 @@ public class HueDiscoveryService : IHueDiscoveryService
 
     private async Task<LocalHueApi?> CreateClientAsync()
     {
-        var bridgeIp = _config?.BridgeIp;
+        var bridgeIp = config?.BridgeIp;
         if (string.IsNullOrWhiteSpace(bridgeIp))
         {
             bridgeIp = await DiscoverBridgeAsync();
@@ -416,7 +399,7 @@ public class HueDiscoveryService : IHueDiscoveryService
             return null;
         }
 
-        var appKey = _config?.BridgeKey ?? Environment.GetEnvironmentVariable("HUE_APP_KEY");
+        var appKey = config?.BridgeKey ?? Environment.GetEnvironmentVariable("HUE_APP_KEY");
         if (string.IsNullOrWhiteSpace(appKey))
         {
             return null;
@@ -548,6 +531,7 @@ public class HueDiscoveryService : IHueDiscoveryService
                         }
                         catch
                         {
+                            // ignored
                         }
                     }
                 }
@@ -563,6 +547,7 @@ public class HueDiscoveryService : IHueDiscoveryService
                     }
                     catch
                     {
+                        // ignored
                     }
                 }
 
@@ -590,6 +575,7 @@ public class HueDiscoveryService : IHueDiscoveryService
                         }
                         catch
                         {
+                            // ignored
                         }
                     }
 
@@ -599,18 +585,18 @@ public class HueDiscoveryService : IHueDiscoveryService
                         {
                             var x = xVal.Value;
                             var y = yVal.Value;
-                            var YY = brightness.HasValue ? Math.Clamp(brightness.Value / 100.0, 0.0, 1.0) : 1.0;
+                            var yy = brightness.HasValue ? Math.Clamp(brightness.Value / 100.0, 0.0, 1.0) : 1.0;
                             if (y <= 0)
                             {
                                 return null;
                             }
 
-                            var X = YY / y * x;
-                            var Z = YY / y * (1 - x - y);
+                            var X = yy / y * x;
+                            var z = yy / y * (1 - x - y);
 
-                            var rLin = 3.2406 * X - 1.5372 * YY - 0.4986 * Z;
-                            var gLin = -0.9689 * X + 1.8758 * YY + 0.0415 * Z;
-                            var bLin = 0.0557 * X - 0.2040 * YY + 1.0570 * Z;
+                            var rLin = 3.2406 * X - 1.5372 * yy - 0.4986 * z;
+                            var gLin = -0.9689 * X + 1.8758 * yy + 0.0415 * z;
+                            var bLin = 0.0557 * X - 0.2040 * yy + 1.0570 * z;
 
                             double GammaCorrect(double channel)
                             {
@@ -632,6 +618,7 @@ public class HueDiscoveryService : IHueDiscoveryService
                     }
                     catch
                     {
+                        // ignored
                     }
                 }
             }
@@ -658,6 +645,7 @@ public class HueDiscoveryService : IHueDiscoveryService
                             }
                             catch
                             {
+                                // ignored
                             }
                         }
                     }

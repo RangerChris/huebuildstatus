@@ -5,7 +5,7 @@ namespace HueBuildStatus.Api.Features.Hue;
 
 public class BuildSuccessRequest
 {
-    public Guid LightId { get; set; }
+    public Guid LightId { get; init; }
 }
 
 public class BuildSuccessEndpoint(IHueLightService hue) : Endpoint<BuildSuccessRequest>

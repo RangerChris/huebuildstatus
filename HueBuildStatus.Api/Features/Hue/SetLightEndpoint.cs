@@ -5,9 +5,9 @@ namespace HueBuildStatus.Api.Features.Hue;
 
 public class SetLightRequest
 {
-    public Guid LightId { get; set; }
-    public string? ColorName { get; set; }
-    public int DurationMs { get; set; } = 2000;
+    public Guid LightId { get; init; }
+    public string? ColorName { get; init; }
+    public int DurationMs { get; init; } = 2000;
 }
 
 public class SetLightEndpoint(IHueLightService hue) : Endpoint<SetLightRequest>

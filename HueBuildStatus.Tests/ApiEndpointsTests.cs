@@ -23,13 +23,12 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
         // Arrange: provide bridgeIp and bridgeKey in configuration
         var configuredFactory = _factory.WithWebHostBuilder(builder =>
         {
-            builder.ConfigureAppConfiguration((context, conf) =>
+            builder.ConfigureAppConfiguration((_, conf) =>
             {
-                conf.AddInMemoryCollection(new[]
-                {
+                conf.AddInMemoryCollection([
                     new KeyValuePair<string, string?>("bridgeIp", "192.168.1.100"),
                     new KeyValuePair<string, string?>("bridgeKey", "test-key")
-                });
+                ]);
             });
         });
 
@@ -117,7 +116,7 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
     [Fact]
     public async Task RegisterBridge_ReturnsBadRequest_WhenIpMissing()
     {
-        var configuredFactory = _factory.WithWebHostBuilder(builder => { });
+        var configuredFactory = _factory.WithWebHostBuilder(_ => { });
         using var client = configuredFactory.CreateClient();
 
         var content = new StringContent("{ \"Ip\": \"\", \"Key\": \"k\" }", Encoding.UTF8, "application/json");

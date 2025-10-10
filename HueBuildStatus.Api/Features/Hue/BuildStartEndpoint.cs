@@ -5,8 +5,8 @@ namespace HueBuildStatus.Api.Features.Hue;
 
 public class BuildStartRequest
 {
-    public Guid LightId { get; set; }
-    public int DurationMs { get; set; } = 5000;
+    public Guid LightId { get; init; }
+    public int DurationMs { get; init; } = 5000;
 }
 
 public class BuildStartEndpoint(IHueLightService hue) : Endpoint<BuildStartRequest>

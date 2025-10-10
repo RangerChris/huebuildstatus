@@ -185,7 +185,7 @@ public class HueLightServiceTests
         var id = Guid.NewGuid();
         var lights = new Dictionary<Guid, string> { { id, "Desk" } };
         mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
-        var snapshot = new LightSnapshot(id, "{\"on\":true}", DateTime.UtcNow);
+        var snapshot = new LightSnapshot(id, "{\"on\":true}");
         mockDiscovery.Setup(d => d.CaptureLightSnapshotAsync(id)).ReturnsAsync(snapshot);
 
         var service = new HueLightService(mockDiscovery.Object);
@@ -193,7 +193,7 @@ public class HueLightServiceTests
         var result = await service.CaptureLightSnapshotAsync(id);
 
         result.ShouldNotBeNull();
-        result!.LightId.ShouldBe(id);
+        result.LightId.ShouldBe(id);
         result.JsonSnapshot.ShouldBe("{\"on\":true}");
         mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(id), Times.Once);
     }
@@ -278,7 +278,7 @@ public class HueLightServiceTests
         var id = Guid.NewGuid();
         var lights = new Dictionary<Guid, string> { { id, "Desk" } };
         mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
-        var snapshot = new LightSnapshot(id, "{\"on\":true}", DateTime.UtcNow);
+        var snapshot = new LightSnapshot(id, "{\"on\":true}");
         mockDiscovery.Setup(d => d.CaptureLightSnapshotAsync(id)).ReturnsAsync(snapshot);
 
         var service = new HueLightService(mockDiscovery.Object);
@@ -325,7 +325,7 @@ public class HueLightServiceTests
         var id = Guid.NewGuid();
         var lights = new Dictionary<Guid, string> { { id, "Desk" } };
         mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
-        var snapshot = new LightSnapshot(id, "{\"on\":true}", DateTime.UtcNow);
+        var snapshot = new LightSnapshot(id, "{\"on\":true}");
         mockDiscovery.Setup(d => d.CaptureLightSnapshotAsync(id)).ReturnsAsync(snapshot);
 
         var service = new HueLightService(mockDiscovery.Object);

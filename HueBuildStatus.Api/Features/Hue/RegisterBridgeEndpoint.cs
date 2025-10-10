@@ -5,8 +5,8 @@ namespace HueBuildStatus.Api.Features.Hue;
 
 public class RegisterBridgeRequest
 {
-    public string? Ip { get; set; }
-    public string? Key { get; set; }
+    public string? Ip { get; init; }
+    public string? Key { get; init; }
 }
 
 public class RegisterBridgeEndpoint(IHueLightService lightService) : Endpoint<RegisterBridgeRequest, string?>
