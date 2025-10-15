@@ -72,13 +72,6 @@ public class GitHubPushEndpointTests
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
-    public static IEnumerable<object[]> GetTestFiles()
-    {
-        var directory = Path.Combine(AppContext.BaseDirectory, "TestFiles");
-        return Directory.GetFiles(directory, "*.json")
-            .Select(file => new object[] { file });
-    }
-
     private static string? FindJsonProperty(JsonElement element, string propertyName)
     {
         if (element.ValueKind == JsonValueKind.Object)
@@ -113,50 +106,21 @@ public class GitHubPushEndpointTests
     }
 
     [Theory]
-    [MemberData(nameof(GetTestFiles))]
-    public async Task HandleAsync_Integration_ParsesJsonAndVerifiesStatus(string filePath)
+    [InlineData("push.json", null, null)]
+    [InlineData("run-complete.json", "completed", "success")]
+    [InlineData("workflow-complete.json", "completed", "success")]
+    public async Task HandleAsync_Integration_ParsesJsonAndVerifiesStatus(string filePath, string? expectedStatus, string? expectedConclusion)
     {
         // Arrange
-        var jsonContent = await File.ReadAllTextAsync(filePath, TestContext.Current.CancellationToken);
+        var directory = Path.Combine(AppContext.BaseDirectory, "TestFiles\\");
+        var jsonContent = await File.ReadAllTextAsync(directory + filePath, TestContext.Current.CancellationToken);
         var jsonObject = JsonDocument.Parse(jsonContent);
 
         var status = FindJsonProperty(jsonObject.RootElement, "status");
         var conclusion = FindJsonProperty(jsonObject.RootElement, "conclusion");
 
         // Act & Assert
-        switch (status)
-        {
-            case "queued":
-                status.ShouldBe("queued"); // waiting to run
-                break;
-            case "in_progress":
-                status.ShouldBe("in_progress"); // currently running
-                break;
-            case "completed":
-                status.ShouldBe("completed"); // finished execution
-                break;
-        }
-
-        switch (conclusion)
-        {
-            case "success":
-                conclusion.ShouldBe("success"); // passed/succeeded
-                break;
-            case "failure":
-                conclusion.ShouldBe("failure"); // failed
-                break;
-            case "neutral":
-                conclusion.ShouldBe("neutral"); // completed but inconclusive
-                break;
-            case "cancelled":
-                conclusion.ShouldBe("cancelled"); // was cancelled
-                break;
-            case "skipped":
-                conclusion.ShouldBe("skipped"); // was skipped
-                break;
-            case "timed_out":
-                conclusion.ShouldBe("timed_out"); // exceeded time limit
-                break;
-        }
+        status.ShouldBe(expectedStatus);
+        conclusion.ShouldBe(expectedConclusion);
     }
 }
