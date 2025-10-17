@@ -47,6 +47,16 @@ public class GitHubPushEndpoint(ILogger<GitHubPushEndpoint> logger) : EndpointWi
 
     public override async Task HandleAsync(CancellationToken ct)
     {
+        string? githubEvent = HttpContext.Request.Headers["X-GitHub-Event"];
+        if (string.IsNullOrWhiteSpace(githubEvent))
+        {
+            logger.LogInformation("Missing 'X-GitHub-Event' header");
+            await Send.ErrorsAsync(400, ct);
+            return;
+        }
+
+        logger.LogInformation("X-GitHub-Event: {GitHubEvent}", githubEvent);
+
         string req;
         using (var reader = new StreamReader(HttpContext.Request.Body))
         {
