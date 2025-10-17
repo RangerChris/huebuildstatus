@@ -8,7 +8,7 @@ public interface IHueLightService
 
     Task<Dictionary<Guid, string>> GetAllLightsAsync();
 
-    Task<LightInfo?> GetLightByNameAsync(string name);
+    Task<BuildLightInfo?> GetLightByNameAsync(string name);
 
     Task<LightSnapshot?> CaptureLightSnapshotAsync(Guid lightId);
 

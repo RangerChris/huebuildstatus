@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using Shouldly;
 using System.Text.Json;
+using HueBuildStatus.Api.Features.Webhooks;
 
 namespace HueBuildStatus.Tests;
 
@@ -15,6 +16,7 @@ public class GitHubPushEndpointTests
         await using var factory = new ApiWebApplicationFactory();
         var client = factory.CreateClient();
         var content = new StringContent(payloadJson, Encoding.UTF8, "application/json");
+        content.Headers.Add("X-GitHub-Event", "push");
 
         // Act
         var response = await client.PostAsync("/webhooks/github", content, TestContext.Current.CancellationToken);
@@ -31,6 +33,7 @@ public class GitHubPushEndpointTests
         await using var factory = new ApiWebApplicationFactory();
         var client = factory.CreateClient();
         var content = new StringContent(largePayload, Encoding.UTF8, "application/json");
+        content.Headers.Add("X-GitHub-Event", "push");
 
         // Act
         var response = await client.PostAsync("/webhooks/github", content, TestContext.Current.CancellationToken);
@@ -60,7 +63,7 @@ public class GitHubPushEndpointTests
     public async Task HandleAsync_HandlesEmptyPayload()
     {
         // Arrange
-        var emptyPayload = "{}"; // Empty JSON object
+        const string emptyPayload = "{}";
         await using var factory = new ApiWebApplicationFactory();
         var client = factory.CreateClient();
         var content = new StringContent(emptyPayload, Encoding.UTF8, "application/json");
@@ -70,39 +73,6 @@ public class GitHubPushEndpointTests
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-    }
-
-    private static string? FindJsonProperty(JsonElement element, string propertyName)
-    {
-        if (element.ValueKind == JsonValueKind.Object)
-        {
-            foreach (var property in element.EnumerateObject())
-            {
-                if (property.NameEquals(propertyName))
-                {
-                    return property.Value.GetString();
-                }
-
-                var nestedResult = FindJsonProperty(property.Value, propertyName);
-                if (nestedResult != null)
-                {
-                    return nestedResult;
-                }
-            }
-        }
-        else if (element.ValueKind == JsonValueKind.Array)
-        {
-            foreach (var item in element.EnumerateArray())
-            {
-                var nestedResult = FindJsonProperty(item, propertyName);
-                if (nestedResult != null)
-                {
-                    return nestedResult;
-                }
-            }
-        }
-
-        return null;
     }
 
     [Theory]
@@ -116,8 +86,8 @@ public class GitHubPushEndpointTests
         var jsonContent = await File.ReadAllTextAsync(directory + filePath, TestContext.Current.CancellationToken);
         var jsonObject = JsonDocument.Parse(jsonContent);
 
-        var status = FindJsonProperty(jsonObject.RootElement, "status");
-        var conclusion = FindJsonProperty(jsonObject.RootElement, "conclusion");
+        var status = JsonHelper.FindJsonProperty(jsonObject.RootElement, "status");
+        var conclusion = JsonHelper.FindJsonProperty(jsonObject.RootElement, "conclusion");
 
         // Act & Assert
         status.ShouldBe(expectedStatus);

@@ -1,6 +1,6 @@
 namespace HueBuildStatus.Core.Features.Hue;
 
-public class LightInfo
+public class BuildLightInfo
 {
     public Guid Id { get; init; }
 

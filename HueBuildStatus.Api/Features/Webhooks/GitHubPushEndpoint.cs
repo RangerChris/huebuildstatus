@@ -12,39 +12,6 @@ public class GitHubPushEndpoint(ILogger<GitHubPushEndpoint> logger) : EndpointWi
         Description(s => s.WithSummary("Receive GitHub webhook").WithDescription("Logs all received GitHub webhook information."));
     }
 
-    private static string? FindJsonProperty(JsonElement element, string propertyName)
-    {
-        if (element.ValueKind == JsonValueKind.Object)
-        {
-            foreach (var property in element.EnumerateObject())
-            {
-                if (property.NameEquals(propertyName))
-                {
-                    return property.Value.GetString();
-                }
-
-                var nestedResult = FindJsonProperty(property.Value, propertyName);
-                if (nestedResult != null)
-                {
-                    return nestedResult;
-                }
-            }
-        }
-        else if (element.ValueKind == JsonValueKind.Array)
-        {
-            foreach (var item in element.EnumerateArray())
-            {
-                var nestedResult = FindJsonProperty(item, propertyName);
-                if (nestedResult != null)
-                {
-                    return nestedResult;
-                }
-            }
-        }
-
-        return null;
-    }
-
     public override async Task HandleAsync(CancellationToken ct)
     {
         string? githubEvent = HttpContext.Request.Headers["X-GitHub-Event"];
@@ -57,13 +24,13 @@ public class GitHubPushEndpoint(ILogger<GitHubPushEndpoint> logger) : EndpointWi
 
         logger.LogInformation("X-GitHub-Event: {GitHubEvent}", githubEvent);
 
-        string req;
+        string responseContent;
         using (var reader = new StreamReader(HttpContext.Request.Body))
         {
-            req = await reader.ReadToEndAsync(ct);
+            responseContent = await reader.ReadToEndAsync(ct);
         }
 
-        if (string.IsNullOrWhiteSpace(req))
+        if (string.IsNullOrWhiteSpace(responseContent))
         {
             logger.LogInformation("Received empty or null JSON payload");
             await Send.ErrorsAsync(400, ct);
@@ -72,7 +39,7 @@ public class GitHubPushEndpoint(ILogger<GitHubPushEndpoint> logger) : EndpointWi
 
         try
         {
-            using var doc = JsonDocument.Parse(req);
+            using var doc = JsonDocument.Parse(responseContent);
             if (doc.RootElement.ValueKind == JsonValueKind.Object && doc.RootElement.GetRawText() == "{}")
             {
                 logger.LogInformation("Received empty JSON object");
@@ -80,8 +47,8 @@ public class GitHubPushEndpoint(ILogger<GitHubPushEndpoint> logger) : EndpointWi
                 return;
             }
 
-            var status = FindJsonProperty(doc.RootElement, "status");
-            var conclusion = FindJsonProperty(doc.RootElement, "conclusion");
+            var status = JsonHelper.FindJsonProperty(doc.RootElement, "status");
+            var conclusion = JsonHelper.FindJsonProperty(doc.RootElement, "conclusion");
 
             logger.LogInformation("Status: {Status}, Conclusion: {Conclusion}", status, conclusion);
 
@@ -93,4 +60,6 @@ public class GitHubPushEndpoint(ILogger<GitHubPushEndpoint> logger) : EndpointWi
             await Send.ErrorsAsync(400, ct);
         }
     }
+
+
 }

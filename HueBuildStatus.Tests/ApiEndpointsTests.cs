@@ -164,7 +164,7 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
     {
         var mockLightSvc = new Mock<IHueLightService>();
         var id = Guid.NewGuid();
-        var info = new LightInfo { Id = id, Name = "Desk Lamp" };
+        var info = new BuildLightInfo { Id = id, Name = "Desk Lamp" };
         mockLightSvc.Setup(s => s.GetLightByNameAsync(It.IsAny<string>())).ReturnsAsync(info);
 
         var configuredFactory = _factory.WithWebHostBuilder(builder => { builder.ConfigureServices(services => { services.AddSingleton(mockLightSvc.Object); }); });
@@ -182,7 +182,7 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
     public async Task GetLight_ReturnsNotFound_WhenNotFound()
     {
         var mockLightSvc = new Mock<IHueLightService>();
-        mockLightSvc.Setup(s => s.GetLightByNameAsync(It.IsAny<string>())).ReturnsAsync((LightInfo?)null);
+        mockLightSvc.Setup(s => s.GetLightByNameAsync(It.IsAny<string>())).ReturnsAsync((BuildLightInfo?)null);
 
         var configuredFactory = _factory.WithWebHostBuilder(builder => { builder.ConfigureServices(services => { services.AddSingleton(mockLightSvc.Object); }); });
 

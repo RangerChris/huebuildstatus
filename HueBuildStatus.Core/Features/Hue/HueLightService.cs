@@ -61,7 +61,7 @@ public class HueLightService : IHueLightService
         return lights;
     }
 
-    public async Task<LightInfo?> GetLightByNameAsync(string name)
+    public async Task<BuildLightInfo?> GetLightByNameAsync(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -78,7 +78,7 @@ public class HueLightService : IHueLightService
         {
             if (string.Equals(kv.Value, name, StringComparison.OrdinalIgnoreCase))
             {
-                return new LightInfo { Id = kv.Key, Name = kv.Value };
+                return new BuildLightInfo { Id = kv.Key, Name = kv.Value };
             }
         }
 

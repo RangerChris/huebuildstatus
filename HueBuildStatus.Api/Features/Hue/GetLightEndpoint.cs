@@ -8,7 +8,7 @@ public class GetLightRequest
     public string? lightName { get; init; }
 }
 
-public class GetLightEndpoint(IHueLightService hue) : Endpoint<GetLightRequest, LightInfo>
+public class GetLightEndpoint(IHueLightService hue) : Endpoint<GetLightRequest, BuildLightInfo>
 {
     public override void Configure()
     {
