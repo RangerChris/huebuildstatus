@@ -1,9 +1,10 @@
 using System.Text.Json;
 using FastEndpoints;
+using HueBuildStatus.Core.Features.Queue;
 
 namespace HueBuildStatus.Api.Features.Webhooks;
 
-public class GitHubPushEndpoint(ILogger<GitHubPushEndpoint> logger) : EndpointWithoutRequest
+public class GitHubPushEndpoint(ILogger<GitHubPushEndpoint> logger, EventQueue queue) : EndpointWithoutRequest
 {
     public override void Configure()
     {
@@ -51,6 +52,9 @@ public class GitHubPushEndpoint(ILogger<GitHubPushEndpoint> logger) : EndpointWi
             var conclusion = JsonHelper.FindJsonProperty(doc.RootElement, "conclusion");
 
             logger.LogInformation("Status: {Status}, Conclusion: {Conclusion}", status, conclusion);
+
+            // Add status, conclusion and githubEvent to EventQueue
+            await queue.EnqueueAsync(new BuildEvent(githubEvent, status ?? "", conclusion ?? ""));
 
             await Send.OkAsync(new { status, conclusion }, cancellation: ct);
         }

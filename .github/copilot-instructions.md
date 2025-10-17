@@ -36,7 +36,7 @@ Coding conventions / style:
 - Serilog for logging
 - xUnit (xunit.v3) for unit testing
 - Moq for mocking dependencies in tests
-- FluentAssertions (version 7.2.0) for readable assertions in tests, never update to latest version
+- Shouldly (version 4.3.0) for readable assertions in tests, never update to latest version
 - Assume the developer is using Rider 2025.2.2 and works on a Windows 11 PC. 
 
 Testing:
