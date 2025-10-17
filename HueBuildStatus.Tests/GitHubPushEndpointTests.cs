@@ -82,8 +82,8 @@ public class GitHubPushEndpointTests
     public async Task HandleAsync_Integration_ParsesJsonAndVerifiesStatus(string filePath, string? expectedStatus, string? expectedConclusion)
     {
         // Arrange
-        var directory = Path.Combine(AppContext.BaseDirectory, "TestFiles\\");
-        var jsonContent = await File.ReadAllTextAsync(directory + filePath, TestContext.Current.CancellationToken);
+        var directory = Path.Combine(AppContext.BaseDirectory, "TestFiles");
+        var jsonContent = await File.ReadAllTextAsync(Path.Combine(directory, filePath), TestContext.Current.CancellationToken);
         var jsonObject = JsonDocument.Parse(jsonContent);
 
         var status = JsonHelper.FindJsonProperty(jsonObject.RootElement, "status");
