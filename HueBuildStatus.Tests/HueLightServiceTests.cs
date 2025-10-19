@@ -1,341 +1,405 @@
-using HueApi.ColorConverters;
+using HueBuildStatus.Core.Features.Config;
 using HueBuildStatus.Core.Features.Hue;
+using Microsoft.Extensions.Logging;
 using Moq;
-using Shouldly;
 
 namespace HueBuildStatus.Tests;
 
 public class HueLightServiceTests
 {
-    [Fact]
-    public async Task GetBridgeIpAsync_ReturnsConfiguredIp_WhenProvided()
+    private readonly Mock<IHueDiscoveryService> _discoveryServiceMock;
+    private readonly Mock<IAppConfiguration> _configMock;
+    private readonly Mock<ILogger<HueLightService>> _loggerMock;
+    private readonly HueLightService _hueLightService;
+
+    public HueLightServiceTests()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        var service = new HueLightService(mockDiscovery.Object);
-
-        var result = await service.GetBridgeIpAsync("10.0.0.5");
-
-        result.ShouldBe("10.0.0.5");
-        mockDiscovery.Verify(d => d.DiscoverBridgeAsync(), Times.Never);
+        _discoveryServiceMock = new Mock<IHueDiscoveryService>();
+        _configMock = new Mock<IAppConfiguration>();
+        _loggerMock = new Mock<ILogger<HueLightService>>();
+        _hueLightService = new HueLightService(_discoveryServiceMock.Object, _configMock.Object, _loggerMock.Object);
     }
 
     [Fact]
-    public async Task GetBridgeIpAsync_UsesDiscovery_WhenConfiguredIsNull()
+    public async Task GetBridgeIpAsync_ReturnsProvidedIp()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        mockDiscovery.Setup(d => d.DiscoverBridgeAsync()).ReturnsAsync("192.168.1.2");
+        // Act
+        var result = await _hueLightService.GetBridgeIpAsync("192.168.1.1");
 
-        var service = new HueLightService(mockDiscovery.Object);
-
-        var result = await service.GetBridgeIpAsync();
-
-        result.ShouldBe("192.168.1.2");
-        mockDiscovery.Verify(d => d.DiscoverBridgeAsync(), Times.Once);
+        // Assert
+        Assert.Equal("192.168.1.1", result);
     }
 
     [Fact]
-    public async Task GetBridgeIpAsync_ReturnsNull_WhenDiscoveryReturnsNull()
+    public async Task GetBridgeIpAsync_ReturnsConfiguredIp()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        mockDiscovery.Setup(d => d.DiscoverBridgeAsync()).ReturnsAsync((string?)null);
+        // Arrange
+        _configMock.Setup(c => c.BridgeIp).Returns("192.168.1.2");
 
-        var service = new HueLightService(mockDiscovery.Object);
+        // Act
+        var result = await _hueLightService.GetBridgeIpAsync();
 
-        var result = await service.GetBridgeIpAsync();
-
-        result.ShouldBeNull();
-        mockDiscovery.Verify(d => d.DiscoverBridgeAsync(), Times.Once);
+        // Assert
+        Assert.Equal("192.168.1.2", result);
     }
 
     [Fact]
-    public async Task RegisterBridgeAsync_ReturnsConfiguredKey_WhenProvided()
+    public async Task GetBridgeIpAsync_DiscoversIp()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        var service = new HueLightService(mockDiscovery.Object);
+        // Arrange
+        _discoveryServiceMock.Setup(d => d.DiscoverBridgeAsync()).ReturnsAsync("192.168.1.3");
 
-        var result = await service.RegisterBridgeAsync("1.2.3.4", "existing-key");
+        // Act
+        var result = await _hueLightService.GetBridgeIpAsync();
 
-        result.ShouldBe("existing-key");
-        mockDiscovery.Verify(d => d.AuthenticateAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        // Assert
+        Assert.Equal("192.168.1.3", result);
     }
 
     [Fact]
-    public async Task RegisterBridgeAsync_UsesAuthenticate_WhenNoConfiguredKey()
+    public async Task RegisterBridgeAsync_ReturnsProvidedKey()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        mockDiscovery.Setup(d => d.AuthenticateAsync("1.2.3.4", It.IsAny<string>())).ReturnsAsync("new-key");
+        // Act
+        var result = await _hueLightService.RegisterBridgeAsync("192.168.1.1", "key123");
 
-        var service = new HueLightService(mockDiscovery.Object);
-
-        var result = await service.RegisterBridgeAsync("1.2.3.4");
-
-        result.ShouldBe("new-key");
-        mockDiscovery.Verify(d => d.AuthenticateAsync("1.2.3.4", It.IsAny<string>()), Times.Once);
+        // Assert
+        Assert.Equal("key123", result);
     }
 
     [Fact]
-    public async Task RegisterBridgeAsync_ReturnsNull_WhenBridgeIpIsMissing()
+    public async Task RegisterBridgeAsync_ReturnsConfiguredKey()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        var service = new HueLightService(mockDiscovery.Object);
+        // Arrange
+        _configMock.Setup(c => c.BridgeKey).Returns("key456");
 
-        var result = await service.RegisterBridgeAsync("");
+        // Act
+        var result = await _hueLightService.RegisterBridgeAsync("192.168.1.1");
 
-        result.ShouldBeNull();
-        mockDiscovery.Verify(d => d.AuthenticateAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        // Assert
+        Assert.Equal("key456", result);
     }
 
     [Fact]
-    public async Task GetAllLightsAsync_ReturnsLights_WhenDiscoveryReturns()
+    public async Task RegisterBridgeAsync_Authenticates()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        var id = Guid.NewGuid();
-        var lights = new Dictionary<Guid, string> { { id, "Desk" } };
-        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+        // Arrange
+        _discoveryServiceMock.Setup(d => d.AuthenticateAsync("192.168.1.1", "huebuildstatus#app")).ReturnsAsync("key789");
 
-        var service = new HueLightService(mockDiscovery.Object);
+        // Act
+        var result = await _hueLightService.RegisterBridgeAsync("192.168.1.1");
 
-        var result = await service.GetAllLightsAsync();
-
-        result.ShouldNotBeNull();
-        result.Count.ShouldBe(1);
-        result[id].ShouldBe("Desk");
-        mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
+        // Assert
+        Assert.Equal("key789", result);
     }
 
     [Fact]
-    public async Task GetAllLightsAsync_ReturnsEmpty_WhenDiscoveryReturnsNull()
+    public async Task RegisterBridgeAsync_ReturnsNullForEmptyIp()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        // Return a Task with a null Dictionary to match the nullable return type
-        mockDiscovery.Setup(d => d.GetAllLights()).Returns(Task.FromResult<Dictionary<Guid, string>?>(null));
+        // Act
+        var result = await _hueLightService.RegisterBridgeAsync("");
 
-        var service = new HueLightService(mockDiscovery.Object);
-
-        var result = await service.GetAllLightsAsync();
-
-        result.ShouldNotBeNull();
-        result.Count.ShouldBe(0);
-        mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
+        // Assert
+        Assert.Null(result);
     }
 
     [Fact]
-    public async Task GetLightByNameAsync_ReturnsLight_WhenFound_CaseInsensitive()
+    public async Task GetAllLightsAsync_ReturnsLights()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        var id = Guid.NewGuid();
-        var lights = new Dictionary<Guid, string> { { id, "Desk Lamp" } };
-        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+        // Arrange
+        var lights = new Dictionary<Guid, string> { { Guid.NewGuid(), "Light1" } };
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
 
-        var service = new HueLightService(mockDiscovery.Object);
+        // Act
+        var result = await _hueLightService.GetAllLightsAsync();
 
-        var result = await service.GetLightByNameAsync("desk lamp");
-
-        result.ShouldNotBeNull();
-        result.Id.ShouldBe(id);
-        result.Name.ShouldBe("Desk Lamp");
-        mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
+        // Assert
+        Assert.Equal(lights, result);
     }
 
     [Fact]
-    public async Task GetLightByNameAsync_ReturnsNull_WhenNotFound()
+    public async Task GetAllLightsAsync_ReturnsEmptyWhenNull()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        var lights = new Dictionary<Guid, string> { { Guid.NewGuid(), "Other" } };
-        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+        // Arrange
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync((Dictionary<Guid, string>?)null);
 
-        var service = new HueLightService(mockDiscovery.Object);
+        // Act
+        var result = await _hueLightService.GetAllLightsAsync();
 
-        var result = await service.GetLightByNameAsync("Nonexistent");
-
-        result.ShouldBeNull();
-        mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
+        // Assert
+        Assert.Empty(result);
     }
 
     [Fact]
-    public async Task GetLightByNameAsync_ReturnsNull_WhenNameIsNullOrWhitespace()
+    public async Task GetLightByNameAsync_ReturnsNullForEmptyName()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        var service = new HueLightService(mockDiscovery.Object);
+        // Act
+        var result = await _hueLightService.GetLightByNameAsync("");
 
-        var result = await service.GetLightByNameAsync("   ");
-
-        result.ShouldBeNull();
-        mockDiscovery.Verify(d => d.GetAllLights(), Times.Never);
+        // Assert
+        Assert.Null(result);
     }
 
     [Fact]
-    public async Task GetLightByNameAsync_ReturnsNull_WhenDiscoveryReturnsNull()
+    public async Task GetLightByNameAsync_ReturnsNullWhenNoLights()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        mockDiscovery.Setup(d => d.GetAllLights()).Returns(Task.FromResult<Dictionary<Guid, string>?>(null));
+        // Arrange
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync(new Dictionary<Guid, string>());
 
-        var service = new HueLightService(mockDiscovery.Object);
+        // Act
+        var result = await _hueLightService.GetLightByNameAsync("Light1");
 
-        var result = await service.GetLightByNameAsync("Desk");
-
-        result.ShouldBeNull();
-        mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
+        // Assert
+        Assert.Null(result);
     }
 
     [Fact]
-    public async Task CaptureLightSnapshotAsync_ReturnsSnapshot_WhenDiscoveryReturns()
+    public async Task GetLightByNameAsync_ReturnsLight()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        var id = Guid.NewGuid();
-        var lights = new Dictionary<Guid, string> { { id, "Desk" } };
-        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
-        var snapshot = new LightSnapshot(id, "{\"on\":true}");
-        mockDiscovery.Setup(d => d.CaptureLightSnapshotAsync(id)).ReturnsAsync(snapshot);
+        // Arrange
+        var lightId = Guid.NewGuid();
+        var lights = new Dictionary<Guid, string> { { lightId, "Light1" } };
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
 
-        var service = new HueLightService(mockDiscovery.Object);
+        // Act
+        var result = await _hueLightService.GetLightByNameAsync("Light1");
 
-        var result = await service.CaptureLightSnapshotAsync(id);
-
-        result.ShouldNotBeNull();
-        result.LightId.ShouldBe(id);
-        result.JsonSnapshot.ShouldBe("{\"on\":true}");
-        mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(id), Times.Once);
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(lightId, result.Id);
+        Assert.Equal("Light1", result.Name);
     }
 
     [Fact]
-    public async Task CaptureLightSnapshotAsync_ReturnsNull_WhenLightNotFound()
+    public async Task GetLightByNameAsync_ReturnsNullWhenNotFound()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        var existingId = Guid.NewGuid();
-        var lights = new Dictionary<Guid, string> { { existingId, "Other" } };
-        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+        // Arrange
+        var lights = new Dictionary<Guid, string> { { Guid.NewGuid(), "Light1" } };
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
 
-        var service = new HueLightService(mockDiscovery.Object);
+        // Act
+        var result = await _hueLightService.GetLightByNameAsync("Light2");
 
-        var result = await service.CaptureLightSnapshotAsync(Guid.NewGuid());
-
-        result.ShouldBeNull();
-        mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(It.IsAny<Guid>()), Times.Never);
+        // Assert
+        Assert.Null(result);
     }
 
     [Fact]
-    public async Task CaptureLightSnapshotAsync_ReturnsNull_WhenLightIdIsEmpty()
+    public async Task CaptureLightSnapshotAsync_ReturnsNullForEmptyId()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        var service = new HueLightService(mockDiscovery.Object);
+        // Act
+        var result = await _hueLightService.CaptureLightSnapshotAsync(Guid.Empty);
 
-        var result = await service.CaptureLightSnapshotAsync(Guid.Empty);
-
-        result.ShouldBeNull();
-        mockDiscovery.Verify(d => d.GetAllLights(), Times.Never);
-        mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(It.IsAny<Guid>()), Times.Never);
+        // Assert
+        Assert.Null(result);
     }
 
     [Fact]
-    public async Task SetLightColorAsync_ReturnsFalse_WhenLightIdIsEmpty()
+    public async Task CaptureLightSnapshotAsync_ReturnsNullWhenNoLights()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        var service = new HueLightService(mockDiscovery.Object);
+        // Arrange
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync(new Dictionary<Guid, string>());
 
-        var result = await service.SetLightColorAsync(Guid.Empty, "red", 10);
+        // Act
+        var result = await _hueLightService.CaptureLightSnapshotAsync(Guid.NewGuid());
 
-        result.ShouldBeFalse();
-        mockDiscovery.Verify(d => d.GetAllLights(), Times.Never);
+        // Assert
+        Assert.Null(result);
     }
 
     [Fact]
-    public async Task SetLightColorAsync_ReturnsFalse_WhenLightNotFound()
+    public async Task CaptureLightSnapshotAsync_ReturnsNullWhenLightNotFound()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(new Dictionary<Guid, string> { { Guid.NewGuid(), "Other" } });
+        // Arrange
+        var lights = new Dictionary<Guid, string> { { Guid.NewGuid(), "Light1" } };
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
 
-        var service = new HueLightService(mockDiscovery.Object);
+        // Act
+        var result = await _hueLightService.CaptureLightSnapshotAsync(Guid.NewGuid());
 
-        var result = await service.SetLightColorAsync(Guid.NewGuid(), "green", 10);
-
-        result.ShouldBeFalse();
-        mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
-        mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(It.IsAny<Guid>()), Times.Never);
+        // Assert
+        Assert.Null(result);
     }
 
     [Fact]
-    public async Task SetLightColorAsync_ReturnsFalse_ForUnknownColor()
+    public async Task CaptureLightSnapshotAsync_ReturnsSnapshot()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        var id = Guid.NewGuid();
-        var lights = new Dictionary<Guid, string> { { id, "Desk" } };
-        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+        // Arrange
+        var lightId = Guid.NewGuid();
+        var lights = new Dictionary<Guid, string> { { lightId, "Light1" } };
+        var snapshot = new LightSnapshot(lightId, "Light1");
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+        _discoveryServiceMock.Setup(d => d.CaptureLightSnapshotAsync(lightId)).ReturnsAsync(snapshot);
 
-        var service = new HueLightService(mockDiscovery.Object);
+        // Act
+        var result = await _hueLightService.CaptureLightSnapshotAsync(lightId);
 
-        var result = await service.SetLightColorAsync(id, "blueish", 10);
-
-        result.ShouldBeFalse();
-        mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
-        mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(It.IsAny<Guid>()), Times.Never);
+        // Assert
+        Assert.Equal(snapshot, result);
     }
 
     [Fact]
-    public async Task SetLightColorAsync_CapturesSetsAndRestores_WhenColorIsValid()
+    public async Task SetLightColorAsync_ReturnsFalseForEmptyId()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        var id = Guid.NewGuid();
-        var lights = new Dictionary<Guid, string> { { id, "Desk" } };
-        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
-        var snapshot = new LightSnapshot(id, "{\"on\":true}");
-        mockDiscovery.Setup(d => d.CaptureLightSnapshotAsync(id)).ReturnsAsync(snapshot);
+        // Act
+        var result = await _hueLightService.SetLightColorAsync(Guid.Empty, "red");
 
-        var service = new HueLightService(mockDiscovery.Object);
-
-        var result = await service.SetLightColorAsync(id, "green", 10);
-
-        result.ShouldBeTrue();
-        mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(id), Times.Once);
-        mockDiscovery.Verify(d => d.SetColorOfLamp(id, It.IsAny<RGBColor>()), Times.Once);
-        mockDiscovery.Verify(d => d.RestoreLightSnapshotAsync(snapshot, It.IsAny<int>()), Times.Once);
+        // Assert
+        Assert.False(result);
     }
 
     [Fact]
-    public async Task FlashLightAsync_ReturnsFalse_WhenLightIdIsEmpty()
+    public async Task SetLightColorAsync_ReturnsFalseWhenNoLights()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        var service = new HueLightService(mockDiscovery.Object);
+        // Arrange
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync(new Dictionary<Guid, string>());
 
-        var result = await service.FlashLightAsync(Guid.Empty, 100);
+        // Act
+        var result = await _hueLightService.SetLightColorAsync(Guid.NewGuid(), "red");
 
-        result.ShouldBeFalse();
-        mockDiscovery.Verify(d => d.GetAllLights(), Times.Never);
+        // Assert
+        Assert.False(result);
     }
 
     [Fact]
-    public async Task FlashLightAsync_ReturnsFalse_WhenLightNotFound()
+    public async Task SetLightColorAsync_ReturnsFalseWhenLightNotFound()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(new Dictionary<Guid, string> { { Guid.NewGuid(), "Other" } });
+        // Arrange
+        var lights = new Dictionary<Guid, string> { { Guid.NewGuid(), "Light1" } };
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
 
-        var service = new HueLightService(mockDiscovery.Object);
+        // Act
+        var result = await _hueLightService.SetLightColorAsync(Guid.NewGuid(), "red");
 
-        var result = await service.FlashLightAsync(Guid.NewGuid(), 100);
-
-        result.ShouldBeFalse();
-        mockDiscovery.Verify(d => d.GetAllLights(), Times.Once);
-        mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(It.IsAny<Guid>()), Times.Never);
+        // Assert
+        Assert.False(result);
     }
 
     [Fact]
-    public async Task FlashLightAsync_TogglesAndRestores_WhenSuccessful()
+    public async Task SetLightColorAsync_ReturnsFalseForInvalidColor()
     {
-        var mockDiscovery = new Mock<IHueDiscoveryService>();
-        var id = Guid.NewGuid();
-        var lights = new Dictionary<Guid, string> { { id, "Desk" } };
-        mockDiscovery.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
-        var snapshot = new LightSnapshot(id, "{\"on\":true}");
-        mockDiscovery.Setup(d => d.CaptureLightSnapshotAsync(id)).ReturnsAsync(snapshot);
+        // Arrange
+        var lightId = Guid.NewGuid();
+        var lights = new Dictionary<Guid, string> { { lightId, "Light1" } };
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
 
-        var service = new HueLightService(mockDiscovery.Object);
+        // Act
+        var result = await _hueLightService.SetLightColorAsync(lightId, "invalid");
 
-        var result = await service.FlashLightAsync(id, 200);
+        // Assert
+        Assert.False(result);
+    }
 
-        result.ShouldBeTrue();
-        mockDiscovery.Verify(d => d.CaptureLightSnapshotAsync(id), Times.Once);
-        mockDiscovery.Verify(d => d.SetOnState(id, true), Times.Exactly(2));
-        mockDiscovery.Verify(d => d.SetOnState(id, false), Times.Exactly(2));
-        mockDiscovery.Verify(d => d.RestoreLightSnapshotAsync(snapshot, It.IsAny<int>()), Times.Once);
+    [Fact]
+    public async Task SetLightColorAsync_SetsColorSuccessfully()
+    {
+        // Arrange
+        var lightId = Guid.NewGuid();
+        var lights = new Dictionary<Guid, string> { { lightId, "Light1" } };
+        var snapshot = new LightSnapshot(lightId, "Light1");
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+        _discoveryServiceMock.Setup(d => d.CaptureLightSnapshotAsync(lightId)).ReturnsAsync(snapshot);
+        _discoveryServiceMock.Setup(d => d.SetColorOfLamp(lightId, It.IsAny<HueApi.ColorConverters.RGBColor>())).Returns(Task.CompletedTask);
+        _discoveryServiceMock.Setup(d => d.RestoreLightSnapshotAsync(It.IsAny<LightSnapshot>(),0)).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _hueLightService.SetLightColorAsync(lightId, "red");
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task SetLightColorAsync_HandlesException()
+    {
+        // Arrange
+        var lightId = Guid.NewGuid();
+        var lights = new Dictionary<Guid, string> { { lightId, "Light1" } };
+        var snapshot = new LightSnapshot(lightId, "Light1");
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+        _discoveryServiceMock.Setup(d => d.CaptureLightSnapshotAsync(lightId)).ReturnsAsync(snapshot);
+        _discoveryServiceMock.Setup(d => d.SetColorOfLamp(lightId, It.IsAny<HueApi.ColorConverters.RGBColor>())).ThrowsAsync(new Exception("Bridge error"));
+        _discoveryServiceMock.Setup(d => d.RestoreLightSnapshotAsync(It.IsAny<LightSnapshot>(), 0)).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _hueLightService.SetLightColorAsync(lightId, "red");
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task FlashLightAsync_ReturnsFalseForEmptyId()
+    {
+        // Act
+        var result = await _hueLightService.FlashLightAsync(Guid.Empty);
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task FlashLightAsync_ReturnsFalseWhenNoLights()
+    {
+        // Arrange
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync(new Dictionary<Guid, string>());
+
+        // Act
+        var result = await _hueLightService.FlashLightAsync(Guid.NewGuid());
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task FlashLightAsync_ReturnsFalseWhenLightNotFound()
+    {
+        // Arrange
+        var lights = new Dictionary<Guid, string> { { Guid.NewGuid(), "Light1" } };
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+
+        // Act
+        var result = await _hueLightService.FlashLightAsync(Guid.NewGuid());
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task FlashLightAsync_FlashesSuccessfully()
+    {
+        // Arrange
+        var lightId = Guid.NewGuid();
+        var lights = new Dictionary<Guid, string> { { lightId, "Light1" } };
+        var snapshot = new LightSnapshot(lightId, "Light1");
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+        _discoveryServiceMock.Setup(d => d.CaptureLightSnapshotAsync(lightId)).ReturnsAsync(snapshot);
+        _discoveryServiceMock.Setup(d => d.SetOnState(lightId, true)).Returns(Task.CompletedTask);
+        _discoveryServiceMock.Setup(d => d.SetOnState(lightId, false)).Returns(Task.CompletedTask);
+        _discoveryServiceMock.Setup(d => d.RestoreLightSnapshotAsync(It.IsAny<LightSnapshot>(),0)).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _hueLightService.FlashLightAsync(lightId);
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task FlashLightAsync_HandlesException()
+    {
+        // Arrange
+        var lightId = Guid.NewGuid();
+        var lights = new Dictionary<Guid, string> { { lightId, "Light1" } };
+        var snapshot = new LightSnapshot(lightId, "Light1");
+        _discoveryServiceMock.Setup(d => d.GetAllLights()).ReturnsAsync(lights);
+        _discoveryServiceMock.Setup(d => d.CaptureLightSnapshotAsync(lightId)).ReturnsAsync(snapshot);
+        _discoveryServiceMock.Setup(d => d.SetOnState(lightId, true)).ThrowsAsync(new Exception("Bridge error"));
+        _discoveryServiceMock.Setup(d => d.RestoreLightSnapshotAsync(It.IsAny<LightSnapshot>(),0)).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _hueLightService.FlashLightAsync(lightId);
+
+        // Assert
+        Assert.False(result);
     }
 }

@@ -75,6 +75,39 @@ public class GitHubPushEndpointTests
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
+    [Fact]
+    public async Task HandleAsync_ReturnsBadRequest_WhenGitHubEventHeaderIsMissing()
+    {
+        // Arrange
+        const string payloadJson = """{ "status": "completed" }""";
+        await using var factory = new ApiWebApplicationFactory();
+        var client = factory.CreateClient();
+        var content = new StringContent(payloadJson, Encoding.UTF8, "application/json");
+        // Note: not adding X-GitHub-Event header
+
+        // Act
+        var response = await client.PostAsync("/webhooks/github", content, TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task HandleAsync_ReturnsBadRequest_WhenPayloadIsEmptyString()
+    {
+        // Arrange
+        await using var factory = new ApiWebApplicationFactory();
+        var client = factory.CreateClient();
+        var content = new StringContent("", Encoding.UTF8, "application/json");
+        content.Headers.Add("X-GitHub-Event", "push");
+
+        // Act
+        var response = await client.PostAsync("/webhooks/github", content, TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
     [Theory]
     [InlineData("push.json", null, null)]
     [InlineData("run-complete.json", "completed", "success")]

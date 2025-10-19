@@ -82,6 +82,25 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
     }
 
     [Fact]
+    public async Task GetAllLightsEndpoint_ReturnsOkAndEmptyJson_WhenServiceReturnsNull()
+    {
+        var mockLightSvc = new Mock<IHueLightService>();
+        mockLightSvc.Setup(s => s.GetAllLightsAsync()).ReturnsAsync((Dictionary<Guid, string>?)null);
+
+        var configuredFactory = _factory.WithWebHostBuilder(builder => { builder.ConfigureServices(services => { services.AddSingleton(mockLightSvc.Object); }); });
+
+        using var client = configuredFactory.CreateClient();
+
+        var resp = await client.GetAsync("/hue/GetAllLights", TestContext.Current.CancellationToken);
+
+        resp.StatusCode.ShouldBe(HttpStatusCode.OK);
+        resp.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
+
+        var json = await resp.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        json.ShouldContain("{}"); // empty object for NameList
+    }
+
+    [Fact]
     public async Task DiscoverBridge_ReturnsOkWithIp_WhenFound()
     {
         var mockLightSvc = new Mock<IHueLightService>();

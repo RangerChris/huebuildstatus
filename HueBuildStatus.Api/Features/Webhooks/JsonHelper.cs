@@ -47,8 +47,12 @@ public static class JsonHelper
         {
             if (property.NameEquals(propertyName))
             {
-                result = property.Value.GetString();
-                return true;
+                if (property.Value.ValueKind == JsonValueKind.String)
+                {
+                    result = property.Value.GetString();
+                    return true;
+                }
+                // else not a string, return null
             }
 
             var nestedResult = JsonHelper.FindJsonProperty(property.Value, propertyName);
