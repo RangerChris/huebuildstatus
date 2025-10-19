@@ -1,5 +1,7 @@
 using HueApi.ColorConverters;
 using HueBuildStatus.Core.Features.Config;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace HueBuildStatus.Core.Features.Hue;
 
@@ -7,47 +9,73 @@ public class HueLightService : IHueLightService
 {
     private readonly IAppConfiguration? _config;
     private readonly IHueDiscoveryService _discoveryService;
+    private readonly ILogger<HueLightService> _logger;
 
-    public HueLightService(IHueDiscoveryService discoveryService, IAppConfiguration? config = null)
+    public HueLightService(IHueDiscoveryService discoveryService, IAppConfiguration? config = null, ILogger<HueLightService>? logger = null)
     {
         _discoveryService = discoveryService ?? throw new ArgumentNullException(nameof(discoveryService));
         _config = config;
+        _logger = logger ?? NullLogger<HueLightService>.Instance;
     }
 
     public async Task<string?> GetBridgeIpAsync(string? configuredBridgeIp = null)
     {
         if (!string.IsNullOrWhiteSpace(configuredBridgeIp))
         {
+            _logger.LogInformation("Using provided bridge IP {Ip}", configuredBridgeIp);
             return configuredBridgeIp;
         }
 
         if (!string.IsNullOrWhiteSpace(_config?.BridgeIp))
         {
+            _logger.LogInformation("Using configured bridge IP {Ip}", _config!.BridgeIp);
             return _config!.BridgeIp;
         }
 
-        return await _discoveryService.DiscoverBridgeAsync();
+        var discovered = await _discoveryService.DiscoverBridgeAsync();
+        if (discovered != null)
+        {
+            _logger.LogInformation("Discovered bridge IP {Ip}", discovered);
+        }
+        else
+        {
+            _logger.LogWarning("Failed to discover bridge IP");
+        }
+        return discovered;
     }
 
     public async Task<string?> RegisterBridgeAsync(string bridgeIp, string? configuredBridgeKey = null)
     {
         if (!string.IsNullOrWhiteSpace(configuredBridgeKey))
         {
+            _logger.LogInformation("Using provided bridge key");
             return configuredBridgeKey;
         }
 
         if (!string.IsNullOrWhiteSpace(_config?.BridgeKey))
         {
+            _logger.LogInformation("Using configured bridge key");
             return _config!.BridgeKey;
         }
 
         if (string.IsNullOrWhiteSpace(bridgeIp))
         {
+            _logger.LogWarning("Bridge IP is required for authentication");
             return null;
         }
 
+        _logger.LogInformation("Authenticating with bridge at {Ip}", bridgeIp);
         var deviceType = "huebuildstatus#app";
-        return await _discoveryService.AuthenticateAsync(bridgeIp, deviceType);
+        var key = await _discoveryService.AuthenticateAsync(bridgeIp, deviceType);
+        if (key != null)
+        {
+            _logger.LogInformation("Successfully authenticated with bridge at {Ip}", bridgeIp);
+        }
+        else
+        {
+            _logger.LogWarning("Failed to authenticate with bridge at {Ip}", bridgeIp);
+        }
+        return key;
     }
 
     public async Task<Dictionary<Guid, string>> GetAllLightsAsync()
@@ -55,9 +83,11 @@ public class HueLightService : IHueLightService
         var lights = await _discoveryService.GetAllLights();
         if (lights is null)
         {
+            _logger.LogWarning("Failed to retrieve lights from bridge");
             return new Dictionary<Guid, string>();
         }
 
+        _logger.LogInformation("Retrieved {Count} lights from bridge", lights.Count);
         return lights;
     }
 
@@ -65,12 +95,14 @@ public class HueLightService : IHueLightService
     {
         if (string.IsNullOrWhiteSpace(name))
         {
+            _logger.LogWarning("Light name is required");
             return null;
         }
 
         var lights = await _discoveryService.GetAllLights();
         if (lights is null || lights.Count == 0)
         {
+            _logger.LogWarning("No lights available on bridge");
             return null;
         }
 
@@ -78,10 +110,12 @@ public class HueLightService : IHueLightService
         {
             if (string.Equals(kv.Value, name, StringComparison.OrdinalIgnoreCase))
             {
+                _logger.LogInformation("Light '{Name}' found with ID {Id}", kv.Value, kv.Key);
                 return new BuildLightInfo { Id = kv.Key, Name = kv.Value };
             }
         }
 
+        _logger.LogWarning("Light '{Name}' not found", name);
         return null;
     }
 
@@ -89,21 +123,33 @@ public class HueLightService : IHueLightService
     {
         if (lightId == Guid.Empty)
         {
+            _logger.LogWarning("Invalid light ID for snapshot");
             return null;
         }
 
         var lights = await _discoveryService.GetAllLights();
         if (lights is null || lights.Count == 0)
         {
+            _logger.LogWarning("No lights available for snapshot");
             return null;
         }
 
         if (!lights.ContainsKey(lightId))
         {
+            _logger.LogWarning("Light {Id} not found for snapshot", lightId);
             return null;
         }
 
-        return await _discoveryService.CaptureLightSnapshotAsync(lightId);
+        var snapshot = await _discoveryService.CaptureLightSnapshotAsync(lightId);
+        if (snapshot != null)
+        {
+            _logger.LogInformation("Captured snapshot for light {Id}", lightId);
+        }
+        else
+        {
+            _logger.LogWarning("Failed to capture snapshot for light {Id}", lightId);
+        }
+        return snapshot;
     }
 
     public async Task<bool> SetLightColorAsync(Guid lightId, string colorName, int showDurationMs = 2000)
@@ -128,6 +174,8 @@ public class HueLightService : IHueLightService
         {
             return false;
         }
+
+        _logger.LogInformation("Setting light {Id} to color {Color}", lightId, colorName);
 
         RGBColor color;
         switch (colorName.Trim().ToLowerInvariant())
@@ -160,10 +208,12 @@ public class HueLightService : IHueLightService
                 await _discoveryService.RestoreLightSnapshotAsync(snapshot);
             }
 
+            _logger.LogInformation("Light {Id} set to {Color}", lightId, colorName);
             return true;
         }
         catch
         {
+            _logger.LogError("Failed to set light {Id} to color {Color}", lightId, colorName);
             try
             {
                 if (snapshot is not null)
@@ -197,6 +247,8 @@ public class HueLightService : IHueLightService
         {
             return false;
         }
+
+        _logger.LogInformation("Flashing light {Id}", lightId);
 
         LightSnapshot? snapshot = null;
         try
@@ -240,10 +292,12 @@ public class HueLightService : IHueLightService
                 await _discoveryService.RestoreLightSnapshotAsync(snapshot);
             }
 
+            _logger.LogInformation("Flashed light {Id}", lightId);
             return true;
         }
         catch
         {
+            _logger.LogError("Failed to flash light {Id}", lightId);
             try
             {
                 if (snapshot is not null)
