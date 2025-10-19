@@ -100,7 +100,7 @@ The project will be built in an agent mode, with code generated for approval aft
     *   **Task 4.1:** Write tests for and implement robust error handling (e.g., Hue Bridge is offline, invalid webhook payload). ✅
     *   **Task 4.2:** Implement structured logging throughout the application. ✅
     *   **Task 4.3:** Review code against the 80% coverage target and add tests where necessary. ✅
-    *   **Task 4.4:** Create documentation using the FastEndpoints explaining configuration and API usage. ☐
+    *   **Task 4.4:** Create documentation using the FastEndpoints explaining configuration and API usage. ✅
 
 **8. Testing & Validation**
 

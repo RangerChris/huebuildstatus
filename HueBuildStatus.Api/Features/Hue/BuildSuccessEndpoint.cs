@@ -6,6 +6,7 @@ namespace HueBuildStatus.Api.Features.Hue;
 public class BuildSuccessRequest
 {
     public Guid LightId { get; init; }
+    public int DurationMs { get; init; } = 5000;
 }
 
 public class BuildSuccessEndpoint(IHueLightService hue) : Endpoint<BuildSuccessRequest>
@@ -14,7 +15,12 @@ public class BuildSuccessEndpoint(IHueLightService hue) : Endpoint<BuildSuccessR
     {
         Post("/hue/BuildSuccess");
         AllowAnonymous();
-        Description(s => s.WithSummary("Set light to green for build success").WithDescription("Shows green on the specified light for 5 seconds and restores the previous state."));
+        Description(s => s
+            .WithSummary("Set light to green for build success")
+            .WithDescription("Shows green on the specified light for 5 seconds to indicate a successful build, then restores the previous state. Requires bridgeIp and bridgeKey to be set in appsettings.json.")
+            .Accepts<BuildSuccessRequest>("Request containing the light ID")
+            .Produces(200)
+            .Produces(404));
     }
 
     public override async Task HandleAsync(BuildSuccessRequest req, CancellationToken ct)
@@ -25,7 +31,7 @@ public class BuildSuccessEndpoint(IHueLightService hue) : Endpoint<BuildSuccessR
             return;
         }
 
-        var ok = await hue.SetLightColorAsync(req.LightId, "green", 5000);
+        var ok = await hue.SetLightColorAsync(req.LightId, "green", req.DurationMs);
         if (!ok)
         {
             await Send.NotFoundAsync(ct);

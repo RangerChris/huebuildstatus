@@ -9,7 +9,11 @@ public class DiscoverBridgeEndpoint(IHueLightService lightService) : EndpointWit
     {
         Get("/hue/discover");
         AllowAnonymous();
-        Description(x => x.WithSummary("Discover Hue bridge").WithDescription("Returns the discovered bridge IP address or 404 if not found."));
+        Description(x => x
+            .WithSummary("Discover Hue bridge")
+            .WithDescription("Automatically discovers the IP address of the Hue bridge on the local network. This IP can be used to set the 'bridgeIp' in appsettings.json for subsequent operations.")
+            .Produces(200)
+            .Produces(404));
     }
 
     public override async Task HandleAsync(CancellationToken ct)

@@ -14,7 +14,12 @@ public class BuildFailedEndpoint(IHueLightService hue) : Endpoint<BuildFailedReq
     {
         Post("/hue/BuildFailed");
         AllowAnonymous();
-        Description(s => s.WithSummary("Set light to red for build failure").WithDescription("Shows red on the specified light for 5 seconds and restores the previous state."));
+        Description(s => s
+            .WithSummary("Set light to red for build failure")
+            .WithDescription("Shows red on the specified light for 5 seconds to indicate a failed build, then restores the previous state. Requires bridgeIp and bridgeKey to be set in appsettings.json.")
+            .Accepts<BuildFailedRequest>("Request containing the light ID")
+            .Produces(200)
+            .Produces(404));
     }
 
     public override async Task HandleAsync(BuildFailedRequest req, CancellationToken ct)

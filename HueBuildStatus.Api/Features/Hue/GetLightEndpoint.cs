@@ -14,7 +14,12 @@ public class GetLightEndpoint(IHueLightService hue) : Endpoint<GetLightRequest, 
     {
         Get("/hue/getlight");
         AllowAnonymous();
-        Description(s => s.WithSummary("Get Hue light by name").WithDescription(""));
+        Description(s => s
+            .WithSummary("Get Hue light by name")
+            .WithDescription("Retrieves information about a specific light by its name. Requires bridgeIp and bridgeKey to be set in appsettings.json.")
+            .Accepts<GetLightRequest>("Request with the name of the light to retrieve")
+            .Produces(200)
+            .Produces(404));
     }
 
     public override async Task HandleAsync(GetLightRequest req, CancellationToken ct)

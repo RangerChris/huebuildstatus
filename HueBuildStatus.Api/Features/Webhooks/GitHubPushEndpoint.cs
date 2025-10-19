@@ -10,7 +10,11 @@ public class GitHubPushEndpoint(ILogger<GitHubPushEndpoint> logger, EventQueue q
     {
         Post("/webhooks/github");
         AllowAnonymous();
-        Description(s => s.WithSummary("Receive GitHub webhook").WithDescription("Logs all received GitHub webhook information."));
+        Description(s => s
+            .WithSummary("Receive GitHub webhook")
+            .WithDescription("Receives webhook payloads from GitHub for push events and other actions. Processes the payload to trigger build status updates. Configure webhooks in your GitHub repository settings pointing to this endpoint.")
+            .Produces(200)
+            .Produces(400));
     }
 
     public override async Task HandleAsync(CancellationToken ct)

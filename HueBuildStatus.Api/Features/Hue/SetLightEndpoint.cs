@@ -16,7 +16,12 @@ public class SetLightEndpoint(IHueLightService hue) : Endpoint<SetLightRequest>
     {
         Post("/hue/SetLight");
         AllowAnonymous();
-        Description(s => s.WithSummary("Set Hue light color for a short duration").WithDescription("Shows a color on the light and restores the previous state."));
+        Description(s => s
+            .WithSummary("Set Hue light color for a short duration")
+            .WithDescription("Shows a specified color on the light for the given duration (default 2 seconds) and then restores the previous state. Supported colors: red, green, yellow. Requires bridgeIp and bridgeKey to be set in appsettings.json.")
+            .Accepts<SetLightRequest>("Request containing light ID, color name, and duration")
+            .Produces(200)
+            .Produces(404));
     }
 
     public override async Task HandleAsync(SetLightRequest req, CancellationToken ct)

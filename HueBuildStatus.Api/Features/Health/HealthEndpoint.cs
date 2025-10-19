@@ -18,7 +18,8 @@ public class HealthEndpoint : EndpointWithoutRequest
         AllowAnonymous();
         Description(x => x
             .WithSummary("Health check endpoint")
-            .WithDescription("Returns 200 OK if the service is running and Hue bridge configuration is present."));
+            .WithDescription("Returns 200 OK if the service is running and Hue bridge configuration is present.")
+            .Produces(200));
     }
 
     public override async Task HandleAsync(CancellationToken ct)

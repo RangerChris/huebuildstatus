@@ -9,7 +9,10 @@ public class GetAllLightsEndpoint(IHueLightService lightService) : EndpointWitho
     {
         Get("/hue/GetAllLights");
         AllowAnonymous();
-        Description(x => x.WithSummary("Returns a list of all lights found").WithDescription(""));
+        Description(x => x
+            .WithSummary("Returns a list of all lights found")
+            .WithDescription("Retrieves all lights connected to the configured Hue bridge. Requires bridgeIp and bridgeKey to be set in appsettings.json.")
+            .Produces(200));
     }
 
     public override async Task HandleAsync(CancellationToken ct)
