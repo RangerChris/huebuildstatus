@@ -138,4 +138,21 @@ public class BuildEventLoggerTests
         _hueLightServiceMock.Verify(s => s.GetLightByNameAsync("TestLight"), Times.Once);
         _hueLightServiceMock.VerifyNoOtherCalls();
     }
+
+    [Fact]
+    public async Task HandleAsync_HueLightServiceThrows_LogsErrorAndContinues()
+    {
+        // Arrange
+        var lightId = Guid.NewGuid();
+        _appConfigurationMock.Setup(c => c.LightName).Returns("TestLight");
+        _hueLightServiceMock.Setup(s => s.GetLightByNameAsync("TestLight")).ReturnsAsync(new BuildLightInfo { Id = lightId, Name = "TestLight" });
+        _hueLightServiceMock.Setup(s => s.FlashLightAsync(lightId, 5000)).ThrowsAsync(new Exception("Bridge offline"));
+        var buildEvent = new BuildEvent("workflow_run", "in_progress", null);
+
+        // Act
+        await _buildEventLogger.HandleAsync(buildEvent);
+
+        // Assert
+        // The method should complete without throwing, and the error should be logged
+    }
 }

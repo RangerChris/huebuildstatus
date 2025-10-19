@@ -51,6 +51,13 @@ public class GitHubPushEndpoint(ILogger<GitHubPushEndpoint> logger, EventQueue q
             var status = JsonHelper.FindJsonProperty(doc.RootElement, "status");
             var conclusion = JsonHelper.FindJsonProperty(doc.RootElement, "conclusion");
 
+            if (string.IsNullOrEmpty(status))
+            {
+                logger.LogInformation("Webhook payload missing status");
+                await Send.ErrorsAsync(400, ct);
+                return;
+            }
+
             logger.LogInformation("Status: {Status}, Conclusion: {Conclusion}", status, conclusion);
 
             // Add status, conclusion and githubEvent to EventQueue

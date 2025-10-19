@@ -24,23 +24,30 @@ public class BuildEventLogger(ILogger<BuildEventLogger> logger, IHueLightService
             return;
         }
 
-        if (@event.Status == "in_progress")
+        try
         {
-            logger.LogInformation("Flashing light for build in progress");
-                        await hueLightService.FlashLightAsync(light.Id, 5000);
+            if (@event.Status == "in_progress")
+            {
+                logger.LogInformation("Flashing light for build in progress");
+                await hueLightService.FlashLightAsync(light.Id);
+            }
+            else if (@event.Status == "completed")
+            {
+                if (@event.Conclusion == "success")
+                {
+                    logger.LogInformation("Setting light to green for build success");
+                    await hueLightService.SetLightColorAsync(light.Id, "green");
+                }
+                else if (@event.Conclusion == "failure")
+                {
+                    logger.LogInformation("Setting light to red for build failure");
+                    await hueLightService.SetLightColorAsync(light.Id, "red");
+                }
+            }
         }
-        else if (@event.Status == "completed")
+        catch (Exception ex)
         {
-            if (@event.Conclusion == "success")
-            {
-                logger.LogInformation("Setting light to green for build success");
-                                await hueLightService.SetLightColorAsync(light.Id, "green", 2000);
-            }
-            else if (@event.Conclusion == "failure")
-            {
-                logger.LogInformation("Setting light to red for build failure");
-                                await hueLightService.SetLightColorAsync(light.Id, "red", 2000);
-            }
+            logger.LogError(ex, "Failed to control Hue light for build event {Action} {Status} {Conclusion}", @event.GithubAction, @event.Status, @event.Conclusion);
         }
     }
 }
