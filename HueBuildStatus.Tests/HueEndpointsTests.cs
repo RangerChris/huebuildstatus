@@ -48,7 +48,7 @@ public class HueEndpointsTests
     public async Task RegisterBridge_ReturnsOk_WhenRegisterReturnsResult()
     {
         var mockLightSvc = new Mock<IHueLightService>();
-        mockLightSvc.Setup(x => x.RegisterBridgeAsync(It.IsAny<string>(), It.IsAny<string?>())).ReturnsAsync("new-key");
+        mockLightSvc.Setup(x => x.RegisterBridgeAsync(It.IsAny<string>())).ReturnsAsync("new-key");
 
         using var client = _factory.WithWebHostBuilder(builder =>
             builder.ConfigureTestServices(services => { services.AddSingleton(mockLightSvc.Object); })).CreateClient();
@@ -63,7 +63,7 @@ public class HueEndpointsTests
     public async Task RegisterBridge_ReturnsNotFound_WhenRegisterReturnsNull()
     {
         var mockLightSvc = new Mock<IHueLightService>();
-        mockLightSvc.Setup(x => x.RegisterBridgeAsync(It.IsAny<string>(), It.IsAny<string?>())).ReturnsAsync((string?)null);
+        mockLightSvc.Setup(x => x.RegisterBridgeAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
 
         using var client = _factory.WithWebHostBuilder(builder =>
             builder.ConfigureTestServices(services => { services.AddSingleton(mockLightSvc.Object); })).CreateClient();

@@ -9,15 +9,14 @@ public class HueLightServiceTests
 {
     private readonly Mock<IHueDiscoveryService> _discoveryServiceMock;
     private readonly Mock<IAppConfiguration> _configMock;
-    private readonly Mock<ILogger<HueLightService>> _loggerMock;
     private readonly HueLightService _hueLightService;
 
     public HueLightServiceTests()
     {
         _discoveryServiceMock = new Mock<IHueDiscoveryService>();
         _configMock = new Mock<IAppConfiguration>();
-        _loggerMock = new Mock<ILogger<HueLightService>>();
-        _hueLightService = new HueLightService(_discoveryServiceMock.Object, _configMock.Object, _loggerMock.Object);
+        var loggerMock = new Mock<ILogger<HueLightService>>();
+        _hueLightService = new HueLightService(_discoveryServiceMock.Object, _configMock.Object, loggerMock.Object);
     }
 
     [Fact]
@@ -60,7 +59,7 @@ public class HueLightServiceTests
     public async Task RegisterBridgeAsync_ReturnsProvidedKey()
     {
         // Act
-        var result = await _hueLightService.RegisterBridgeAsync("192.168.1.1", "key123");
+        var result = await _hueLightService.RegisterBridgeAsync("192.168.1.1");
 
         // Assert
         Assert.Equal("key123", result);

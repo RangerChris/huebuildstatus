@@ -6,7 +6,6 @@ namespace HueBuildStatus.Api.Features.Hue;
 public class RegisterBridgeRequest
 {
     public string? Ip { get; init; }
-    public string? Key { get; init; }
 }
 
 public class RegisterBridgeEndpoint(IHueLightService lightService) : Endpoint<RegisterBridgeRequest, string?>
@@ -18,7 +17,6 @@ public class RegisterBridgeEndpoint(IHueLightService lightService) : Endpoint<Re
         Description(x => x
             .WithSummary("Register the Hue bridge")
             .WithDescription("Registers the application with the Hue bridge to obtain an app key. Provide the bridge IP (from /hue/discover) and optionally an existing key. The returned key should be set as 'bridgeKey' in appsettings.json.")
-            .Accepts<RegisterBridgeRequest>("Request containing the bridge IP and optional existing app key")
             .Produces(200)
             .Produces(404));
     }
@@ -31,7 +29,7 @@ public class RegisterBridgeEndpoint(IHueLightService lightService) : Endpoint<Re
             return;
         }
 
-        var result = await lightService.RegisterBridgeAsync(req.Ip, req.Key);
+        var result = await lightService.RegisterBridgeAsync(req.Ip);
         if (result is null)
         {
             await Send.NotFoundAsync(ct);

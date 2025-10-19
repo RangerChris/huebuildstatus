@@ -340,7 +340,7 @@ public class HueDiscoveryService(HttpClient? httpClient = null, string? discover
         try
         {
             var url = $"http://{bridgeIp}/api";
-            var payload = JsonSerializer.Serialize(new { devicetype = deviceType });
+            var payload = JsonSerializer.Serialize(new { devicetype = deviceType, generateclientkey = true });
             using var content = new StringContent(payload, Encoding.UTF8, "application/json");
             using var resp = await _httpClient.PostAsync(url, content);
             resp.EnsureSuccessStatusCode();

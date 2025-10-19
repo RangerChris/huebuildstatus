@@ -18,7 +18,6 @@ public class BuildSuccessEndpoint(IHueLightService hue) : Endpoint<BuildSuccessR
         Description(s => s
             .WithSummary("Set light to green for build success")
             .WithDescription("Shows green on the specified light for 5 seconds to indicate a successful build, then restores the previous state. Requires bridgeIp and bridgeKey to be set in appsettings.json.")
-            .Accepts<BuildSuccessRequest>("Request containing the light ID")
             .Produces(200)
             .Produces(404));
     }

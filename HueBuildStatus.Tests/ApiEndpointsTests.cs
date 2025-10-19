@@ -148,7 +148,7 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
     public async Task RegisterBridge_ReturnsOkWithKey_WhenRegistered()
     {
         var mockLightSvc = new Mock<IHueLightService>();
-        mockLightSvc.Setup(s => s.RegisterBridgeAsync(It.IsAny<string>(), It.IsAny<string?>())).ReturnsAsync("new-key");
+        mockLightSvc.Setup(s => s.RegisterBridgeAsync(It.IsAny<string>())).ReturnsAsync("new-key");
 
         var configuredFactory = _factory.WithWebHostBuilder(builder => { builder.ConfigureServices(services => { services.AddSingleton(mockLightSvc.Object); }); });
 
@@ -166,7 +166,7 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
     public async Task RegisterBridge_ReturnsNotFound_WhenRegistrationFails()
     {
         var mockLightSvc = new Mock<IHueLightService>();
-        mockLightSvc.Setup(s => s.RegisterBridgeAsync(It.IsAny<string>(), It.IsAny<string?>())).ReturnsAsync((string?)null);
+        mockLightSvc.Setup(s => s.RegisterBridgeAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
 
         var configuredFactory = _factory.WithWebHostBuilder(builder => { builder.ConfigureServices(services => { services.AddSingleton(mockLightSvc.Object); }); });
 

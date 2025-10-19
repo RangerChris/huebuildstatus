@@ -44,14 +44,8 @@ public class HueLightService : IHueLightService
         return discovered;
     }
 
-    public async Task<string?> RegisterBridgeAsync(string bridgeIp, string? configuredBridgeKey = null)
+    public async Task<string?> RegisterBridgeAsync(string bridgeIp)
     {
-        if (!string.IsNullOrWhiteSpace(configuredBridgeKey))
-        {
-            _logger.LogInformation("Using provided bridge key");
-            return configuredBridgeKey;
-        }
-
         if (!string.IsNullOrWhiteSpace(_config?.BridgeKey))
         {
             _logger.LogInformation("Using configured bridge key");
