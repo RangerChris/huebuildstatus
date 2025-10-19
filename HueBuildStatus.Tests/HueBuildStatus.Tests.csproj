@@ -27,7 +27,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <!-- WebApplicationFactory for integration testing of ASP.NET Core apps -->
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.9"/>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.10" />
     </ItemGroup>
 
     <ItemGroup>

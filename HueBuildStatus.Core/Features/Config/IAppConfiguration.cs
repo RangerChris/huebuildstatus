@@ -4,4 +4,5 @@ public interface IAppConfiguration
 {
     string? BridgeIp { get; }
     string? BridgeKey { get; }
+    string? LightName { get; }
 }

@@ -1,6 +1,6 @@
 namespace HueBuildStatus.Core.Features.Queue;
 
-public record BuildEvent(string GithubAction, string Status, string Conclusion);
+public record BuildEvent(string GithubAction, string Status, string? Conclusion);
 
 public interface IBuildEventHandler
 {
@@ -9,7 +9,7 @@ public interface IBuildEventHandler
 
 public class EventQueue
 {
-    private readonly List<IBuildEventHandler> _handlers = new();
+    private readonly List<IBuildEventHandler> _handlers = [];
     private readonly object _lock = new();
 
     public void Subscribe(IBuildEventHandler handler)

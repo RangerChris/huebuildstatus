@@ -22,6 +22,26 @@ public class QueueTests
     }
 
     [Fact]
+    public async Task EnqueueAsync_ShouldNotifySubscribedHandlers_MultipleTimes()
+    {
+        // Arrange
+        var queue = new EventQueue();
+        var handlerMock = new Mock<IBuildEventHandler>();
+        queue.Subscribe(handlerMock.Object);
+        var buildEvent1 = new BuildEvent("push", "success", "success");
+        var buildEvent2 = new BuildEvent("push", "success", "success");
+        var buildEvent3 = new BuildEvent("push", "success", "success");
+
+        // Act
+        await queue.EnqueueAsync(buildEvent1);
+        await queue.EnqueueAsync(buildEvent2);
+        await queue.EnqueueAsync(buildEvent3);
+
+        // Assert
+        handlerMock.Verify(h => h.HandleAsync(buildEvent1), Times.Exactly(3));
+    }
+
+    [Fact]
     public async Task EnqueueAsync_ShouldNotifyMultipleHandlers()
     {
         // Arrange

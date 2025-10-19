@@ -13,8 +13,8 @@ public static class HueFeatureExtensions
 
         services.AddSingleton<IAppConfiguration>(sp => new AppConfiguration(sp.GetRequiredService<IConfiguration>()));
 
-        services.AddScoped<IHueDiscoveryService, HueDiscoveryService>();
-        services.AddScoped<IHueLightService, HueLightService>();
+        services.AddSingleton<IHueDiscoveryService, HueDiscoveryService>();
+        services.AddSingleton<IHueLightService, HueLightService>();
 
         return services;
     }
