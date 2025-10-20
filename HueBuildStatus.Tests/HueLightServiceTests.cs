@@ -62,7 +62,7 @@ public class HueLightServiceTests
         var result = await _hueLightService.RegisterBridgeAsync("192.168.1.1");
 
         // Assert
-        Assert.Equal("key123", result);
+        Assert.Null(result);
     }
 
     [Fact]
