@@ -20,14 +20,15 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
     [Fact]
     public async Task HealthEndpoint_ReturnsOk_WhenConfigured()
     {
-        // Arrange: provide bridgeIp and bridgeKey in configuration
+        // Arrange: provide bridgeIp, bridgeKey, and LightName in configuration
         var configuredFactory = _factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureAppConfiguration((_, conf) =>
             {
                 conf.AddInMemoryCollection([
                     new KeyValuePair<string, string?>("bridgeIp", "192.168.1.100"),
-                    new KeyValuePair<string, string?>("bridgeKey", "test-key")
+                    new KeyValuePair<string, string?>("bridgeKey", "test-key"),
+                    new KeyValuePair<string, string?>("lightName", "Living Room")
                 ]);
             });
         });
@@ -58,6 +59,7 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
         json.ShouldContain("Unhealthy");
         json.ShouldContain("bridgeIp");
         json.ShouldContain("bridgeKey");
+        json.ShouldContain("LightName");
     }
 
     [Fact]

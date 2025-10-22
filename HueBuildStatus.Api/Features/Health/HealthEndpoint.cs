@@ -40,6 +40,11 @@ public class HealthEndpoint : EndpointWithoutRequest
                 missing.Add("bridgeKey");
             }
 
+            if (string.IsNullOrWhiteSpace(_config.LightName))
+            {
+                missing.Add("LightName");
+            }
+
             if (missing.Count == 0)
             {
                 await Send.OkAsync(new { status = "Healthy" }, ct);

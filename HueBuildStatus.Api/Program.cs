@@ -24,6 +24,7 @@ builder.Services.AddFastEndpoints().SwaggerDocument(o =>
             To use the Hue-related endpoints, configure the following settings in `appsettings.json`:
             - `bridgeIp`: The IP address of your Hue Bridge (discover via GET /hue/discover)
             - `bridgeKey`: The app key for authentication (obtain via POST /hue/register)
+            - `lightName`: The name of the light to control for build status
 
             ## Usage
             1. Discover and register your Hue Bridge using /hue/discover and /hue/register

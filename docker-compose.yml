@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  huebuildstatus:
+    build:
+      context: .
+      dockerfile: HueBuildStatus.Api/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - bridgeIp=
+      - bridgeKey=
+      - LightName=

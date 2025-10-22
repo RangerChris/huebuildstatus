@@ -1,0 +1,5 @@
+﻿# Exclude secret files
+appsettings.json
+appsettings.Development.json
+secrets.json
+user-secrets/
