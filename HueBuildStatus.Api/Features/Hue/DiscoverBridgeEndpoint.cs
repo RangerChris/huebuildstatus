@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using FastEndpoints;
+using HueBuildStatus.Core;
 using HueBuildStatus.Core.Features.Hue;
 
 namespace HueBuildStatus.Api.Features.Hue;
@@ -18,6 +20,7 @@ public class DiscoverBridgeEndpoint(IHueLightService lightService) : EndpointWit
 
     public override async Task HandleAsync(CancellationToken ct)
     {
+        var activity = new ActivitySource(TracingConstants.ActivitySourceName).StartActivity(nameof(DiscoverBridgeEndpoint));
         var ip = await lightService.GetBridgeIpAsync();
         if (string.IsNullOrEmpty(ip))
         {
@@ -27,5 +30,6 @@ public class DiscoverBridgeEndpoint(IHueLightService lightService) : EndpointWit
         {
             await Send.OkAsync(ip, ct);
         }
+        activity?.Stop();
     }
 }

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using HueApi.ColorConverters;
 using HueBuildStatus.Core.Features.Config;
 using Microsoft.Extensions.Logging;
@@ -5,31 +6,25 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace HueBuildStatus.Core.Features.Hue;
 
-public class HueLightService : IHueLightService
+public class HueLightService(IHueDiscoveryService discoveryService, IAppConfiguration? config = null, ILogger<HueLightService>? logger = null) : IHueLightService
 {
-    private readonly IAppConfiguration? _config;
-    private readonly IHueDiscoveryService _discoveryService;
-    private readonly ILogger<HueLightService> _logger;
-
-    public HueLightService(IHueDiscoveryService discoveryService, IAppConfiguration? config = null, ILogger<HueLightService>? logger = null)
-    {
-        _discoveryService = discoveryService ?? throw new ArgumentNullException(nameof(discoveryService));
-        _config = config;
-        _logger = logger ?? NullLogger<HueLightService>.Instance;
-    }
+    private readonly IHueDiscoveryService _discoveryService = discoveryService ?? throw new ArgumentNullException(nameof(discoveryService));
+    private readonly ILogger<HueLightService> _logger = logger ?? NullLogger<HueLightService>.Instance;
+    private static readonly ActivitySource ActivitySource = new(TracingConstants.ActivitySourceName);
 
     public async Task<string?> GetBridgeIpAsync(string? configuredBridgeIp = null)
     {
+        var activity = ActivitySource.StartActivity(nameof(GetBridgeIpAsync));
         if (!string.IsNullOrWhiteSpace(configuredBridgeIp))
         {
             _logger.LogInformation("Using provided bridge IP {Ip}", configuredBridgeIp);
             return configuredBridgeIp;
         }
 
-        if (!string.IsNullOrWhiteSpace(_config?.BridgeIp))
+        if (!string.IsNullOrWhiteSpace(config?.BridgeIp))
         {
-            _logger.LogInformation("Using configured bridge IP {Ip}", _config!.BridgeIp);
-            return _config!.BridgeIp;
+            _logger.LogInformation("Using configured bridge IP {Ip}", config!.BridgeIp);
+            return config!.BridgeIp;
         }
 
         var discovered = await _discoveryService.DiscoverBridgeAsync();
@@ -41,15 +36,17 @@ public class HueLightService : IHueLightService
         {
             _logger.LogWarning("Failed to discover bridge IP");
         }
+        activity?.Stop();
         return discovered;
     }
 
     public async Task<string?> RegisterBridgeAsync(string bridgeIp)
     {
-        if (!string.IsNullOrWhiteSpace(_config?.BridgeKey))
+        var activity = ActivitySource.StartActivity(nameof(RegisterBridgeAsync));
+        if (!string.IsNullOrWhiteSpace(config?.BridgeKey))
         {
             _logger.LogInformation("Using configured bridge key");
-            return _config!.BridgeKey;
+            return config!.BridgeKey;
         }
 
         if (string.IsNullOrWhiteSpace(bridgeIp))
@@ -69,11 +66,14 @@ public class HueLightService : IHueLightService
         {
             _logger.LogWarning("Failed to authenticate with bridge at {Ip}", bridgeIp);
         }
+        activity?.Stop();
         return key;
     }
 
     public async Task<Dictionary<Guid, string>> GetAllLightsAsync()
     {
+        var activity = ActivitySource.StartActivity(nameof(GetAllLightsAsync));
+
         var lights = await _discoveryService.GetAllLights();
         if (lights is null)
         {
@@ -82,11 +82,13 @@ public class HueLightService : IHueLightService
         }
 
         _logger.LogInformation("Retrieved {Count} lights from bridge", lights.Count);
+        activity?.Stop();
         return lights;
     }
 
     public async Task<BuildLightInfo?> GetLightByNameAsync(string name)
     {
+        var activity = ActivitySource.StartActivity(nameof(GetLightByNameAsync));
         if (string.IsNullOrWhiteSpace(name))
         {
             _logger.LogWarning("Light name is required");
@@ -110,11 +112,13 @@ public class HueLightService : IHueLightService
         }
 
         _logger.LogWarning("Light '{Name}' not found", name);
+        activity?.Stop();
         return null;
     }
 
     public async Task<LightSnapshot?> CaptureLightSnapshotAsync(Guid lightId)
     {
+        var activity = ActivitySource.StartActivity(nameof(CaptureLightSnapshotAsync));
         if (lightId == Guid.Empty)
         {
             _logger.LogWarning("Invalid light ID for snapshot");
@@ -143,11 +147,13 @@ public class HueLightService : IHueLightService
         {
             _logger.LogWarning("Failed to capture snapshot for light {Id}", lightId);
         }
+        activity?.Stop();
         return snapshot;
     }
 
     public async Task<bool> SetLightColorAsync(Guid lightId, string colorName, int showDurationMs = 2000)
     {
+        var activity = ActivitySource.StartActivity(nameof(SetLightColorAsync));
         if (lightId == Guid.Empty)
         {
             return false;
@@ -220,12 +226,14 @@ public class HueLightService : IHueLightService
                 // swallow
             }
 
+            activity?.Stop();
             return false;
         }
     }
 
     public async Task<bool> FlashLightAsync(Guid lightId, int durationMs = 5000)
     {
+        var activity = ActivitySource.StartActivity(nameof(FlashLightAsync));
         if (lightId == Guid.Empty)
         {
             return false;
@@ -304,6 +312,7 @@ public class HueLightService : IHueLightService
                 // swallow
             }
 
+            activity?.Stop();
             return false;
         }
     }

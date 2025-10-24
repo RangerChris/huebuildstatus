@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using FastEndpoints;
+using HueBuildStatus.Core;
 using HueBuildStatus.Core.Features.Hue;
 
 namespace HueBuildStatus.Api.Features.Hue;
@@ -23,6 +25,7 @@ public class GetLightEndpoint(IHueLightService hue) : Endpoint<GetLightRequest, 
 
     public override async Task HandleAsync(GetLightRequest req, CancellationToken ct)
     {
+        var activity = new ActivitySource(TracingConstants.ActivitySourceName).StartActivity(nameof(GetLightEndpoint));
         if (string.IsNullOrWhiteSpace(req.lightName))
         {
             await Send.ResultAsync(TypedResults.BadRequest());
@@ -37,5 +40,6 @@ public class GetLightEndpoint(IHueLightService hue) : Endpoint<GetLightRequest, 
         }
 
         await Send.OkAsync(info, ct);
+        activity?.Stop();
     }
 }

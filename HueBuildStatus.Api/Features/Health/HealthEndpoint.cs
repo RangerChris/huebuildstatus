@@ -1,17 +1,12 @@
+using System.Diagnostics;
 using FastEndpoints;
+using HueBuildStatus.Core;
 using HueBuildStatus.Core.Features.Config;
 
 namespace HueBuildStatus.Api.Features.Health;
 
-public class HealthEndpoint : EndpointWithoutRequest
+public class HealthEndpoint(IAppConfiguration config) : EndpointWithoutRequest
 {
-    private readonly IAppConfiguration _config;
-
-    public HealthEndpoint(IAppConfiguration config)
-    {
-        _config = config;
-    }
-
     public override void Configure()
     {
         Get("/health");
@@ -24,10 +19,11 @@ public class HealthEndpoint : EndpointWithoutRequest
 
     public override async Task HandleAsync(CancellationToken ct)
     {
+        var activity = new ActivitySource(TracingConstants.ActivitySourceName).StartActivity(nameof(HealthEndpoint));
         try
         {
-            var bridgeIp = _config.BridgeIp;
-            var bridgeKey = _config.BridgeKey;
+            var bridgeIp = config.BridgeIp;
+            var bridgeKey = config.BridgeKey;
 
             var missing = new List<string>();
             if (string.IsNullOrWhiteSpace(bridgeIp))
@@ -40,7 +36,7 @@ public class HealthEndpoint : EndpointWithoutRequest
                 missing.Add("bridgeKey");
             }
 
-            if (string.IsNullOrWhiteSpace(_config.LightName))
+            if (string.IsNullOrWhiteSpace(config.LightName))
             {
                 missing.Add("LightName");
             }
@@ -59,5 +55,6 @@ public class HealthEndpoint : EndpointWithoutRequest
             HttpContext.Response.StatusCode = 503;
             await HttpContext.Response.WriteAsJsonAsync(new { status = "Unhealthy", error = ex.Message }, ct);
         }
+        activity?.Stop();
     }
 }

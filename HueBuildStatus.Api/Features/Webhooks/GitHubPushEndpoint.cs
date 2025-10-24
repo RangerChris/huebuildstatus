@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Text.Json;
 using FastEndpoints;
+using HueBuildStatus.Core;
 using HueBuildStatus.Core.Features.Queue;
 
 namespace HueBuildStatus.Api.Features.Webhooks;
@@ -19,6 +21,7 @@ public class GitHubPushEndpoint(ILogger<GitHubPushEndpoint> logger, EventQueue q
 
     public override async Task HandleAsync(CancellationToken ct)
     {
+        var activity = new ActivitySource(TracingConstants.ActivitySourceName).StartActivity(nameof(GitHubPushEndpoint));
         string? githubEvent = HttpContext.Request.Headers["X-GitHub-Event"];
         if (string.IsNullOrWhiteSpace(githubEvent))
         {
@@ -74,7 +77,6 @@ public class GitHubPushEndpoint(ILogger<GitHubPushEndpoint> logger, EventQueue q
             logger.LogInformation("Received malformed JSON payload");
             await Send.ErrorsAsync(400, ct);
         }
+        activity?.Stop();
     }
-
-
 }

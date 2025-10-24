@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using HueBuildStatus.Core;
 using HueBuildStatus.Core.Features.Queue;
 using HueBuildStatus.Core.Features.Hue;
 using HueBuildStatus.Core.Features.Config;
@@ -8,6 +10,7 @@ public class BuildEventLogger(ILogger<BuildEventLogger> logger, IHueLightService
 {
     public async Task HandleAsync(BuildEvent @event)
     {
+        var activity = new ActivitySource(TracingConstants.ActivitySourceName).StartActivity(nameof(BuildEventLogger));
         logger.LogInformation("Received build event: Action={Action}, Status={Status}, Conclusion={Conclusion}",
             @event.GithubAction, @event.Status, @event.Conclusion);
 
@@ -49,5 +52,7 @@ public class BuildEventLogger(ILogger<BuildEventLogger> logger, IHueLightService
         {
             logger.LogError(ex, "Failed to control Hue light for build event {Action} {Status} {Conclusion}", @event.GithubAction, @event.Status, @event.Conclusion);
         }
+
+        activity?.Stop();
     }
 }

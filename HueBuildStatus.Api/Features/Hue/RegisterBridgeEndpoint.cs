@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using FastEndpoints;
+using HueBuildStatus.Core;
 using HueBuildStatus.Core.Features.Hue;
 
 namespace HueBuildStatus.Api.Features.Hue;
@@ -23,6 +25,7 @@ public class RegisterBridgeEndpoint(IHueLightService lightService) : Endpoint<Re
 
     public override async Task HandleAsync(RegisterBridgeRequest req, CancellationToken ct)
     {
+        var activity = new ActivitySource(TracingConstants.ActivitySourceName).StartActivity(nameof(RegisterBridgeEndpoint));
         if (string.IsNullOrWhiteSpace(req.Ip))
         {
             await Send.ResultAsync(TypedResults.BadRequest());
@@ -38,5 +41,6 @@ public class RegisterBridgeEndpoint(IHueLightService lightService) : Endpoint<Re
         {
             await Send.OkAsync(result, ct);
         }
+        activity?.Stop();
     }
 }

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using HueApi;
@@ -215,6 +216,8 @@ public class HueDiscoveryService(HttpClient? httpClient = null, string? discover
 
     public async Task<Dictionary<Guid, string>?> GetAllLights()
     {
+        using var activity = new ActivitySource(TracingConstants.ActivitySourceName).StartActivity(nameof(GetAllLights), ActivityKind.Internal);
+        activity?.SetTag("Core", "true");
         var client = await CreateClientAsync();
         if (client == null)
         {

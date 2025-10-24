@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using FastEndpoints;
+using HueBuildStatus.Core;
 using HueBuildStatus.Core.Features.Hue;
 
 namespace HueBuildStatus.Api.Features.Hue;
@@ -24,6 +26,7 @@ public class BuildStartEndpoint(IHueLightService hue) : Endpoint<BuildStartReque
 
     public override async Task HandleAsync(BuildStartRequest req, CancellationToken ct)
     {
+        var activity = new ActivitySource(TracingConstants.ActivitySourceName).StartActivity(nameof(BuildStartEndpoint));
         if (req.LightId == Guid.Empty)
         {
             await Send.ResultAsync(TypedResults.BadRequest());
@@ -38,5 +41,6 @@ public class BuildStartEndpoint(IHueLightService hue) : Endpoint<BuildStartReque
         }
 
         await Send.OkAsync(cancellation: ct);
+        activity?.Stop();
     }
 }

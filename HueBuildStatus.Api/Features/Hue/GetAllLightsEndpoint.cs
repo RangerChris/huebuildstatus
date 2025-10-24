@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using FastEndpoints;
+using HueBuildStatus.Core;
 using HueBuildStatus.Core.Features.Hue;
 
 namespace HueBuildStatus.Api.Features.Hue;
@@ -17,9 +19,11 @@ public class GetAllLightsEndpoint(IHueLightService lightService) : EndpointWitho
 
     public override async Task HandleAsync(CancellationToken ct)
     {
+        var activity = new ActivitySource(TracingConstants.ActivitySourceName).StartActivity(nameof(GetAllLightsEndpoint));
         var dict = await lightService.GetAllLightsAsync();
         var resp = new AllLightsResponse { NameList = dict ?? new Dictionary<Guid, string>() };
         await Send.OkAsync(resp, ct);
+        activity?.Stop();
     }
 }
 

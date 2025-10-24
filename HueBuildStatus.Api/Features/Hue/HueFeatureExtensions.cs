@@ -10,9 +10,7 @@ public static class HueFeatureExtensions
     public static IServiceCollection AddHueFeature(this IServiceCollection services)
     {
         services.AddHttpClient();
-
         services.AddSingleton<IAppConfiguration>(sp => new AppConfiguration(sp.GetRequiredService<IConfiguration>(), sp.GetRequiredService<ILogger<AppConfiguration>>()));
-
         services.AddSingleton<IHueDiscoveryService, HueDiscoveryService>();
         services.AddSingleton<IHueLightService, HueLightService>();
 

@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FastEndpoints.Testing" Version="7.0.1"/>
+        <PackageReference Include="FastEndpoints.Testing" Version="7.1.0" />
         <PackageReference Include="coverlet.collector" Version="6.0.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -19,7 +19,7 @@
         <PackageReference Include="Shouldly" Version="4.3.0"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0"/>
         <PackageReference Include="Moq" Version="4.20.72"/>
-        <PackageReference Include="Testcontainers" Version="4.7.0"/>
+        <PackageReference Include="Testcontainers" Version="4.8.1" />
         <PackageReference Include="xunit.v3" Version="3.1.0"/>
         <!-- xUnit v3 test adapter so dotnet test discovers tests -->
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">

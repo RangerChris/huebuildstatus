@@ -22,6 +22,8 @@ HueBuildStatus is a .NET 9 backend service that integrates with Philips Hue ligh
   `dotnet run --project HueBuildStatus.Api\HueBuildStatus.Api.csproj`
 
 - The API will start and Swagger will be available at http://localhost:5000/swagger (port may vary).
+- If you want to use Jaeger to trace requests, ensure you have a Jaeger instance running and configure the `OTLP_ENDPOINT_URL`. Start a docker instances with this command
+`docker run --rm --name jaeger -p 16686:16686 -p 4317:4317 -p 4318:4318 -p 5778:5778 -p 9411:9411 cr.jaegertracing.io/jaegertracing/jaeger:latest`
 
 ### 3) Expose to the internet with ngrok (manual end-to-end testing)
 - Install ngrok (https://ngrok.com/).
