@@ -30,14 +30,64 @@ While no critical security vulnerabilities were found, the following recommendat
 
 **Recommendation**: Implement GitHub webhook signature verification using the `X-Hub-Signature-256` header. See [GitHub's documentation on securing webhooks](https://docs.github.com/en/developers/webhooks-and-events/webhooks/securing-your-webhooks).
 
-**Example Implementation**:
-```csharp
-private bool VerifyGitHubSignature(string payload, string signature, string secret)
+**Implementation Steps**:
+
+1. Add a webhook secret configuration to `appsettings.json`:
+```json
 {
-    using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));
-    var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(payload));
-    var expectedSignature = "sha256=" + BitConverter.ToString(hash).Replace("-", "").ToLower();
-    return signature == expectedSignature;
+  "GitHubWebhookSecret": ""
+}
+```
+
+2. Create a signature verification utility:
+```csharp
+using System.Security.Cryptography;
+using System.Text;
+
+public static class WebhookSignatureVerifier
+{
+    public static bool VerifyGitHubSignature(string payload, string signature, string secret)
+    {
+        if (string.IsNullOrEmpty(signature) || !signature.StartsWith("sha256="))
+            return false;
+
+        var signatureHash = signature.Substring(7); // Remove "sha256=" prefix
+        
+        using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));
+        var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(payload));
+        var expectedSignature = BitConverter.ToString(hash).Replace("-", "").ToLower();
+        
+        return CryptographicOperations.FixedTimeEquals(
+            Encoding.UTF8.GetBytes(signatureHash),
+            Encoding.UTF8.GetBytes(expectedSignature)
+        );
+    }
+}
+```
+
+3. Update the `GitHubPushEndpoint` to verify the signature:
+```csharp
+public override async Task HandleAsync(CancellationToken ct)
+{
+    var signature = HttpContext.Request.Headers["X-Hub-Signature-256"];
+    var secret = Configuration["GitHubWebhookSecret"];
+    
+    if (!string.IsNullOrEmpty(secret))
+    {
+        string payload;
+        using (var reader = new StreamReader(HttpContext.Request.Body))
+        {
+            payload = await reader.ReadToEndAsync(ct);
+        }
+        
+        if (!WebhookSignatureVerifier.VerifyGitHubSignature(payload, signature!, secret))
+        {
+            logger.LogWarning("Invalid webhook signature");
+            await Send.ErrorsAsync(401, ct);
+            return;
+        }
+    }
+    // ... rest of the handler
 }
 ```
 
@@ -79,7 +129,45 @@ livenessProbe:
 
 **Risk**: Low to Medium - Could allow abuse or denial of service attacks.
 
-**Recommendation**: Implement rate limiting on webhook endpoints using FastEndpoints rate limiting features or ASP.NET Core middleware.
+**Recommendation**: Implement rate limiting on webhook endpoints using ASP.NET Core middleware or FastEndpoints rate limiting features.
+
+**Implementation Example** (using ASP.NET Core built-in rate limiting):
+
+1. Add to `Program.cs`:
+```csharp
+using System.Threading.RateLimiting;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add rate limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("webhook", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 60; // 60 requests per minute
+        opt.QueueLimit = 0;
+    });
+});
+
+// ... rest of configuration
+
+var app = builder.Build();
+
+app.UseRateLimiter(); // Add before UseFastEndpoints
+app.UseFastEndpoints().UseSwaggerGen();
+```
+
+2. Apply to endpoints:
+```csharp
+public override void Configure()
+{
+    Post("/webhooks/github");
+    AllowAnonymous();
+    Options(x => x.RequireRateLimiting("webhook"));
+    // ... rest of configuration
+}
+```
 
 #### 5. CORS Configuration
 
