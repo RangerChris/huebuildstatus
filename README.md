@@ -42,3 +42,7 @@ HueBuildStatus is a .NET 9 backend service that integrates with Philips Hue ligh
 - From repository root (cmd.exe):
 
   `dotnet test HueBuildStatus.sln`
+
+## Security
+
+For security best practices, vulnerability reporting, and security audit results, please see [SECURITY.md](SECURITY.md).

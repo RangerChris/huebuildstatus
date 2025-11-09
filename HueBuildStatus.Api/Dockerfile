@@ -20,10 +20,7 @@ RUN dotnet publish "./HueBuildStatus.Api.csproj" -c $BUILD_CONFIGURATION -o /app
 RUN rm -f /app/publish/appsettings*.json
 
 FROM base AS final
-USER root
 WORKDIR /app
 COPY --from=publish /app/publish .
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 USER $APP_UID
-HEALTHCHECK CMD curl --fail http://localhost:8080/health || exit 1
 ENTRYPOINT ["dotnet", "HueBuildStatus.Api.dll"]
