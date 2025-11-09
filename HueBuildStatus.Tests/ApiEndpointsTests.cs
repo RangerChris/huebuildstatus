@@ -87,7 +87,7 @@ public class ApiEndpointsTests : IClassFixture<ApiWebApplicationFactory>
     public async Task GetAllLightsEndpoint_ReturnsOkAndEmptyJson_WhenServiceReturnsNull()
     {
         var mockLightSvc = new Mock<IHueLightService>();
-        mockLightSvc.Setup(s => s.GetAllLightsAsync()).ReturnsAsync((Dictionary<Guid, string>?)null);
+        mockLightSvc.Setup(s => s.GetAllLightsAsync()).ReturnsAsync(new Dictionary<Guid, string>());
 
         var configuredFactory = _factory.WithWebHostBuilder(builder => { builder.ConfigureServices(services => { services.AddSingleton(mockLightSvc.Object); }); });
 
