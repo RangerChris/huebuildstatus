@@ -11,6 +11,15 @@
 *.sln.docstates
 *.env
 
+# Security - sensitive files that should never be committed
+*.pem
+*.key
+*.p12
+*.pfx
+*secrets.json
+*secrets.*.json
+appsettings.Production.json
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
