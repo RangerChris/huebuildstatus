@@ -17,7 +17,7 @@ How Copilot should help:
 
 Coding conventions / style:
 - Use github copilot in agent mode to create code and PRs.
-- Use MCP server tools like context7 for up-to-date documentation on libraries like FastEndpoints and HueApi
+- Use MCP server tools like context7 for up-to-date documentation on libraries like FastEndpoints
 - Use modern C# (nullable reference types enabled, async/await for I/O-bound work).
 - Use featured-based architecture with clear separation of concerns.
 - Follow SOLID principles and best practices for maintainability and testability.
@@ -32,16 +32,15 @@ Coding conventions / style:
 #Techstack
 - .NET 9, latest C# version
 - FastEndpoints for building APIs
-- Hue.Api https://github.com/michielpost/Q42.HueApi for interacting with Philips Hue lights
 - Serilog for logging
-- xUnit (xunit.v3) for unit testing
+- xUnit (xunit.v3) for unit testing and reportgenerator for code coverage reports, see https://github.com/danielpalme/ReportGenerator
 - Moq for mocking dependencies in tests
 - Shouldly (version 4.3.0) for readable assertions in tests, never update to latest version
 - Assume the developer is using Rider 2025.2.2 and works on a Windows 11 PC. 
 
 Testing:
 - Add or update xUnit (xunit.v3) tests in HueBuildStatus.Tests for behavior changes.
-- Tests should follow Arrange-Act-Assert and be deterministic. Use dependency injection to mock external dependencies.
+- Tests should follow Arrange-Act-Assert and be deterministic. Use dependency injection to mock external dependencies for unit test, but do create separate integration tests.
 - Use Testcontainers or in-memory alternatives for integration tests if needed.
 - Aim for high code coverage, but prioritize meaningful tests over coverage percentage.
 
